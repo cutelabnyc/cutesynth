@@ -1,4 +1,4 @@
-#include "random.h";
+#include "random.h"
 
 uint16_t _random_next()
 {

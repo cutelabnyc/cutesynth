@@ -1,4 +1,4 @@
-#include "gate.h";
+#include "gate.h"
 
 void gate_init(t_gate *self) { /* no-op */}
 

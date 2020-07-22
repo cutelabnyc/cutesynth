@@ -1,4 +1,4 @@
-#include "counter.h";
+#include "counter.h"
 
 void counter_init(t_counter *self, uint16_t count_max)
 {
