@@ -8,6 +8,7 @@ extern "C" {
 #endif
 
 typedef struct {
+	uint16_t _empty;
 } t_gate;
 
 void gate_init(t_gate *self);
