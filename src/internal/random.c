@@ -29,5 +29,6 @@ void random_process(t_random *self, uint16_t *in, uint16_t *out)
 void random_set_mock(t_random *self, bool doMock)
 {
 	self->_mock = doMock;
+	self->_hold = 0;
 	self->_mockstep = false;
 }

@@ -49,15 +49,15 @@ void test_changing(void)
 
 void test_mock(void)
 {
-    uint16_t in_data[4] = {
-		1, 1, 1, 1};
-    uint16_t out_data[4];
-	uint16_t exp_data[4] = {
-		0, 1023, 0, 1023
+    uint16_t in_data[6] = {
+		0, 1, 1, 1, 0, 0};
+    uint16_t out_data[6];
+	uint16_t exp_data[6] = {
+		0, 0, 1023, 0, 0, 0
 	};
 
 	random_set_mock(&op, true);
-	run_equality_test(&op, (processor_t)random_process, in_data, out_data, exp_data, 4);
+	run_equality_test(&op, (processor_t)random_process, in_data, out_data, exp_data, 6);
 }
 
 int main(void)
