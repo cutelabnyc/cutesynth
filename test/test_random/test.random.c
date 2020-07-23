@@ -53,7 +53,7 @@ void test_mock(void)
 		1, 1, 1, 1};
     uint16_t out_data[4];
 	uint16_t exp_data[4] = {
-		0, 1, 0, 1
+		0, 1023, 0, 1023
 	};
 
 	random_set_mock(&op, true);

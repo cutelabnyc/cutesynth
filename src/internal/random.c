@@ -20,7 +20,7 @@ void random_process(t_random *self, uint16_t *in, uint16_t *out)
 		if (!self->_mock) {
 			self->_hold = _random_next();
 		} else {
-			self->_hold = self->_mockstep ? 1 : 0;
+			self->_hold = self->_mockstep ? 1023 : 0;
 			self->_mockstep = !self->_mockstep;
 		}
     }
