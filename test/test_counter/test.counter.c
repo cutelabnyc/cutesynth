@@ -46,7 +46,7 @@ void test_wrap(void)
     TEST_ASSERT_EQUAL_INT16(out, 0);
 
     counter_process(&c, &in, &out);
-    TEST_ASSERT_EQUAL_INT16(out, 0);
+    TEST_ASSERT_EQUAL_INT16(out, 1);
 
     counter_process(&c, &in, &out);
     TEST_ASSERT_EQUAL_INT16(out, 0);
