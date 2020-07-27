@@ -3,12 +3,13 @@
 #include <test_util.h>
 
 #define MARGIN_OF_CERTAINTY (128)
+#define RANDOM_SEED 42
 
 t_random op;
 
 void setUp()
 {
-    random_init(&op);
+    random_init(&op, RANDOM_SEED);
 }
 
 void tearDown() {}

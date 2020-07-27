@@ -1,14 +1,13 @@
 #include "random.h"
-#include <time.h>
 
 uint16_t _random_next()
 {
 	return rand() & 1023; // hardcoded 10 bits
 }
 
-void random_init(t_random *self)
+void random_init(t_random *self, uint16_t seed)
 {
-	self->_seed = time(NULL);
+	self->_seed = seed;
 	self->_hold = _random_next();
 	self->_mock = false;
 	self->_mockstep = true;

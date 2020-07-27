@@ -18,7 +18,7 @@ extern "C"
 		bool _mockstep;
 	} t_random;
 
-	void random_init(t_random *self);
+	void random_init(t_random *self, uint16_t seed);
 	void random_process(t_random *self, uint16_t *in, uint16_t *out);
 	void random_reset(t_random *self, uint16_t seed);
 
