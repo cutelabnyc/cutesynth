@@ -4,11 +4,12 @@
 
 t_gate op;
 
-void setUp() {
+void setUp()
+{
     gate_init(&op);
 }
 
-void tearDown() { }
+void tearDown() {}
 
 void test_open(void)
 {
@@ -22,7 +23,8 @@ void test_open(void)
     uint16_t exp_data[testSize] = {
         1, 2, 3, 4};
 
-    for (int i = 0; i < testSize; i++) {
+    for (int i = 0; i < testSize; i++)
+    {
         gate_process(&op, sig_data + i, gate_data + i, out_data + i);
         TEST_ASSERT_EQUAL_UINT16(out_data[i], exp_data[i]);
     }
@@ -30,7 +32,7 @@ void test_open(void)
 
 void test_closed(void)
 {
-        const int testSize = 4;
+    const int testSize = 4;
 
     uint16_t sig_data[testSize] = {
         1, 2, 3, 4};
@@ -40,7 +42,8 @@ void test_closed(void)
     uint16_t exp_data[testSize] = {
         1, 2, 0, 0};
 
-    for (int i = 0; i < testSize; i++) {
+    for (int i = 0; i < testSize; i++)
+    {
         gate_process(&op, sig_data + i, gate_data + i, out_data + i);
         TEST_ASSERT_EQUAL_UINT16(out_data[i], exp_data[i]);
     }
@@ -48,10 +51,10 @@ void test_closed(void)
 
 int main(void)
 {
-  UNITY_BEGIN();
+    UNITY_BEGIN();
 
-  RUN_TEST(test_closed);
-  RUN_TEST(test_open);
+    RUN_TEST(test_closed);
+    RUN_TEST(test_open);
 
-  return UNITY_END();
+    return UNITY_END();
 }
