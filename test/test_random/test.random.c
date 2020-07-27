@@ -1,9 +1,10 @@
 #include <unity.h>
 #include <cuteop.h>
 #include <test_util.h>
+#include <time.h>
 
 #define MARGIN_OF_CERTAINTY (128)
-#define RANDOM_SEED 42
+#define RANDOM_SEED time(0)
 
 t_random op;
 
