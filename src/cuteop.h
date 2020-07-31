@@ -1,3 +1,4 @@
+#include "internal/autopulse.h"
 #include "internal/counter.h"
 #include "internal/edge.h"
 #include "internal/gate.h"
