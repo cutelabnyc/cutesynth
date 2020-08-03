@@ -22,7 +22,7 @@ void autopulse_init(t_autopulse *self);
 /**
  * Set the average number of pulses per second.
  */
-void autopulse_set_pulses_per_second(t_autopulse *self, float pulses_per_second);
+void autopulse_set_pulses_per_second(t_autopulse *self, double pulses_per_second);
 
 /**
  * Fetch the next sample, provided the amount of time that has elapsed since the last process.
