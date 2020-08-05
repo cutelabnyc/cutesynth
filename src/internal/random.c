@@ -77,7 +77,6 @@ void random_reset(t_random *self, uint16_t seed)
 	self->_iy = 0;
 	for (size_t i = 0; i < NTAB; i++) self->_iv[i] = 0;
 	self->_state = -((int32_t) seed);
-	self->_hold = _random_next(self);
 }
 
 void random_set_mock(t_random *self, bool doMock)
