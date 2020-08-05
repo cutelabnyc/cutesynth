@@ -10,12 +10,16 @@ extern "C"
 {
 #endif
 
+#define NTAB 32
+
 	typedef struct
 	{
 		uint16_t _hold;
-		uint16_t _seed;
 		bool _mock;
 		bool _mockstep;
+		int32_t _iy;
+		int32_t _iv[NTAB];
+		int32_t _state;
 	} t_random;
 
 	void random_init(t_random *self, uint16_t seed);

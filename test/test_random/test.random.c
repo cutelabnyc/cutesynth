@@ -58,9 +58,9 @@ void test_changing(void)
 void test_reset(void)
 {
     uint16_t out_data[MARGIN_OF_CERTAINTY];
-    uint16_t test_data[MARGIN_OF_CERTAINTY];
+	uint16_t seed = RANDOM_SEED;
 
-    random_reset(&op, op._seed);
+    random_reset(&op, seed);
 
     uint16_t in = 1;
     for (int i = 0; i < MARGIN_OF_CERTAINTY; i++)
@@ -68,7 +68,7 @@ void test_reset(void)
         random_process(&op, &in, out_data + i);
     }
 
-    random_reset(&op, op._seed);
+    random_reset(&op, seed);
 
     for (int i = 0; i < MARGIN_OF_CERTAINTY; i++)
     {
