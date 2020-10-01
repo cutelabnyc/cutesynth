@@ -1,0 +1,30 @@
+{
+    "name": "CuteOp",
+    "description": "Library for CuteLab modules",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "Max Ardito",
+            "maintainer": true
+        },
+        {
+            "name": "Sam Tarakajian",
+            "maintainer": true
+        }
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/cutelabnyc/cute-op.git"
+    },
+    "version": "1.0.0",
+    "frameworks": [
+        "arduino"
+    ],
+    "platforms": [
+        "atmelavr",
+        "ststm32"
+    ],
+    "build": {
+        "flags": "cmake"
+    }
+}
