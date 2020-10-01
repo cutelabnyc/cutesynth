@@ -24,5 +24,6 @@
         "native",
         "atmelavr",
         "ststm32"
-    ]
+    ],
+    "files": "src/cuteop.h"
 }
