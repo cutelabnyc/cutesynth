@@ -23,8 +23,5 @@
     "platforms": [
         "atmelavr",
         "ststm32"
-    ],
-    "build": {
-        "flags": "cmake"
-    }
+    ]
 }
