@@ -17,13 +17,6 @@
         "url": "https://github.com/cutelabnyc/cute-op.git"
     },
     "version": "1.0.0",
-    "frameworks": [
-        "arduino"
-    ],
-    "platforms": [
-        "native",
-        "atmelavr",
-        "ststm32"
-    ],
-    "files": "src/cuteop.h"
+    "frameworks": "*",
+    "platforms": "*"
 }
