@@ -4,3 +4,4 @@
 #include "internal/gate.h"
 #include "internal/random.h"
 #include "internal/thresh.h"
+#include "internal/banks.h"
