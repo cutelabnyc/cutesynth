@@ -10,16 +10,16 @@ extern "C"
 #endif
     typedef struct
     {
-        float *freq;
-        float mult;
+        double *freq;
+        double mult;
 
         uint8_t numOsc;
     } t_banks;
 
     void banks_init(t_banks *self, uint8_t numOsc);
 
-    void banks_setFreq(t_banks *self, float freq);
-    void banks_setMult(t_banks *self, float mult);
+    void banks_setFreq(t_banks *self, double freq);
+    void banks_setMult(t_banks *self, double mult);
     //void banks_setNumOsc(t_banks *self, uint8_t numOsc);
 
 #ifdef __cplusplus
