@@ -1,3 +1,10 @@
+/**
+ * 
+ * TODO: This is the basic sketch for a class that would produce
+ * mathematical sequences based on a given function, represented
+ * by the function pointer *_f. Designed to be implemented in the
+ * Uexkull sum & difference module.
+
 #ifndef SEQUENCE_H
 #define SEQUENCE_H
 
