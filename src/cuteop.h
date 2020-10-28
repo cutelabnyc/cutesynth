@@ -4,4 +4,5 @@
 #include "internal/gate.h"
 #include "internal/random.h"
 #include "internal/thresh.h"
+#include "internal/oscillator.h"
 //#include "internal/sequence.h"
