@@ -21,14 +21,14 @@ extern "C"
     } osc_t;
 
     // initialization
-    osc_t *sine_init(void);
+    osc_t *osc_init(void);
 
     // input fns
     void osc_time(osc_t *self, float time);
     void osc_reset(osc_t *self);
 
     // status
-    int8_t osc_get_zc(osc_t *self);
+    int8_t osc_get_zero_crossing(osc_t *self);
 
     // process
     float osc_step(osc_t *self, float fm);
