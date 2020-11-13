@@ -5,4 +5,5 @@
 #include "internal/random.h"
 #include "internal/thresh.h"
 #include "internal/oscillator.h"
+#include "dsp_utils/lut.h"
 //#include "internal/sequence.h"
