@@ -8,8 +8,8 @@
 extern "C"
 {
 #endif
-
-    typedef void (*generator_t)(double *);
+    // generator_t(double *vector, uint16_t numElements);
+    typedef void (*generator_t)(double *, uint16_t);
 
     typedef struct
     {
@@ -18,9 +18,9 @@ extern "C"
         uint8_t _numElements;
     } t_series;
 
-    void series_init(t_series *self, uint8_t _numElements, void (*f)(double *));
+    void series_init(t_series *self, uint8_t numElements, void (*f)(double *, uint16_t));
 
-    void series_process(t_series *self, double firstTerm);
+    void series_process(t_series *self, double firstElement);
     void series_set(t_series *self, void (*f)(double *));
 
 #ifdef __cplusplus
