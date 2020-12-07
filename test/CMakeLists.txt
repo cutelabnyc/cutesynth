@@ -6,3 +6,5 @@ add_subdirectory(test_edge)
 add_subdirectory(test_gate)
 add_subdirectory(test_random)
 add_subdirectory(test_thresh)
+add_subdirectory(test_series)
+
