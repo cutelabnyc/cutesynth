@@ -12,6 +12,8 @@ extern "C" {
 typedef struct {
 	bool _state;
 	double _fps;
+	uint16_t _limit;
+	uint16_t _elapsed;
 } t_autopulse;
 
 /**
@@ -23,6 +25,10 @@ void autopulse_init(t_autopulse *self);
  * Set the average number of pulses per second.
  */
 void autopulse_set_pulses_per_second(t_autopulse *self, double pulses_per_second);
+
+/**
+ * Set the minimum interval between flips
+void autopulse_set_minimum_interval(t_autopulse *self, uint16_t msec_int);
 
 /**
  * Fetch the next sample, provided the amount of time that has elapsed since the last process.
