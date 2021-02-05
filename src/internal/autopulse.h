@@ -28,6 +28,7 @@ void autopulse_set_pulses_per_second(t_autopulse *self, double pulses_per_second
 
 /**
  * Set the minimum interval between flips
+ */
 void autopulse_set_minimum_interval(t_autopulse *self, uint16_t msec_int);
 
 /**
