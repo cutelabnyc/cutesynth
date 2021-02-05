@@ -10,6 +10,8 @@ extern "C"
 {
 #endif
 
+#define CUTE_RANDOM_MAX 1024
+
 #define NTAB 32
 
 	typedef struct

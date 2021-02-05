@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include "random.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -14,12 +15,15 @@ typedef struct {
 	double _fps;
 	uint16_t _limit;
 	uint16_t _elapsed;
+	t_random _random;
 } t_autopulse;
 
 /**
  * Autopulse automatically pulses between high and low states (1 and 0 output) with some probability.
  */
-void autopulse_init(t_autopulse *self);
+void autopulse_init(t_autopulse *self, uint16_t seed);
+
+void autopulse_reset(t_autopulse *self, uint16_t seed);
 
 /**
  * Set the average number of pulses per second.
