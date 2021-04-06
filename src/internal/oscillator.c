@@ -10,18 +10,11 @@ const float sine_lut[LUT_SIN_SIZE + 1] = {
     1.0};
 
 // initialization
-osc_t *osc_init(void)
+void osc_init(osc_t* self)
 {
-    osc_t *self = malloc(sizeof(osc_t));
-    if (!self)
-    {
-        printf("!osc_sine\n");
-        return NULL;
-    }
     self->rate = 0.02f;
     self->id = 0.0f;
     self->zero_x = 1;
-    return self;
 }
 
 float _lim_f_n1_1(float in)

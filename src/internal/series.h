@@ -8,7 +8,6 @@
 extern "C"
 {
 #endif
-    // generator_t(double *vector, uint16_t numElements);
     typedef void (*generator_t)(double *, uint16_t);
 
     typedef struct

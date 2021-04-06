@@ -7,3 +7,4 @@
 #include "internal/oscillator.h"
 #include "dsp_utils/lut.h"
 #include "internal/series.h"
+#include "internal/bank.h"

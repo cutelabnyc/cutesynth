@@ -21,7 +21,7 @@ extern "C"
     } osc_t;
 
     // initialization
-    osc_t *osc_init(void);
+    void osc_init(osc_t* self);
 
     // input fns
     void osc_time(osc_t *self, float time);
