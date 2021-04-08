@@ -28,7 +28,7 @@ typedef struct bank
 {
     osc_t *osc;
 
-    uint8_t _numOsc; // Number of oscillators in the bank
+    uint16_t _numOsc; // Number of oscillators in the bank
 
     float _sampleRate;      // Sampling rate
     float _fund;            // Bank frequency fundamental
@@ -41,8 +41,8 @@ typedef struct bank
 /**
  * Initialize the 'bank' struct
  */
-void BK_init(bank_t *self,
-    uint8_t numOsc,
+void bank_init(bank_t *self,
+    uint16_t numOsc,
     float sampleRate,
     float fund,
     waveform_t waveform);
@@ -52,17 +52,17 @@ void BK_init(bank_t *self,
  *
  * TODO: Add and describe parameters
  */
-void BK_destroy(bank_t *self);
+void bank_destroy(bank_t *self);
 
 /**
  * Sets the frequencies of the bank with an incoming
  * array of floats
  */
-void BK_setFrequencies(bank_t *self, float *vector, uint8_t numFreq);
+void bank_setFrequencies(bank_t *self, double *vector, uint16_t numFreq);
 
 /**
  * Process a single sample from Uexkull
  */
-float BK_process(bank_t *self);
+float bank_process(bank_t *self);
 
 #endif /* BANK_H */

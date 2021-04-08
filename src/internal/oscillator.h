@@ -17,7 +17,7 @@ extern "C"
     {
         float rate;
         float id;
-        int8_t zero_x;
+        int16_t zero_x;
     } osc_t;
 
     // initialization
@@ -28,7 +28,7 @@ extern "C"
     void osc_reset(osc_t *self);
 
     // status
-    int8_t osc_get_zero_crossing(osc_t *self);
+    int16_t osc_get_zero_crossing(osc_t *self);
 
     // process
     float osc_step(osc_t *self, float fm);

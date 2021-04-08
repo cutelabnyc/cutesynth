@@ -14,13 +14,15 @@ extern "C"
     {
         double *_vector;
         generator_t _f;
-        uint8_t _numElements;
+        uint16_t _numElements;
     } t_series;
 
-    void series_init(t_series *self, uint8_t numElements, void (*f)(double *, uint16_t));
-
+    void series_init(t_series *self, uint16_t numElements, generator_t f);
+    void series_destroy(t_series *self);
+    void series_setNumElements(t_series *self, uint16_t numElements);
+    void series_setSeries(t_series *self, generator_t f);
+    double* series_getSeries(t_series *self);
     void series_process(t_series *self, double firstElement);
-    void series_set(t_series *self, void (*f)(double *));
 
 #ifdef __cplusplus
 }

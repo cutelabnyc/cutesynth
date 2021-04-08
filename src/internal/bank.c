@@ -2,13 +2,13 @@
 
 #define TEST_LFO_FREQ 0.01
 
-void BK_init(bank_t *self,
-    uint8_t numOsc,
+void bank_init(bank_t *self,
+    uint16_t numOsc,
     float sampleRate,
     float fund,
     waveform_t waveform)
 {
-    
+
     self->_numOsc = numOsc;
 
     self->osc = (osc_t *)malloc(sizeof(osc_t) * self->_numOsc);
@@ -27,20 +27,22 @@ void BK_init(bank_t *self,
     }
 }
 
-void BK_destroy(bank_t *self)
+void bank_destroy(bank_t *self)
 {
     free(self->osc);
 }
 
-void BK_setFrequencies(bank_t *self, float *vector, uint8_t numFreq)
+void bank_setFrequencies(bank_t *self, double *vector, uint16_t numFreq)
 {
+    self->_fund = vector[0];
+    
     for (int i = 0; i < numFreq; i++)
     {
         osc_time(&(self->osc[i]), (float)(vector[i] / (self->_sampleRate / 2)));
     }
 }
 
-float BK_process(bank_t *self)
+float bank_process(bank_t *self)
 {
     float sig = 0;
 

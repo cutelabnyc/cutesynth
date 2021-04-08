@@ -39,7 +39,7 @@ void osc_reset(osc_t *self)
 }
 
 // status
-int8_t osc_get_zero_crossing(osc_t *self)
+int16_t osc_get_zero_crossing(osc_t *self)
 {
     return (self->zero_x);
 }
