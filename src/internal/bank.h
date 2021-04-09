@@ -22,7 +22,7 @@ typedef enum
 } waveform_t;
 
 /**
- * bank_t: Module's main data structure
+ * t_bank: Module's main data structure
  */
 typedef struct bank
 {
@@ -36,12 +36,12 @@ typedef struct bank
     float _1vo;             // 1V/Oct input
 
     waveform_t waveform; // Waveform for all bank oscillators
-} bank_t;
+} t_bank;
 
 /**
  * Initialize the 'bank' struct
  */
-void bank_init(bank_t *self,
+void bank_init(t_bank *self,
     uint16_t numOsc,
     float sampleRate,
     float fund,
@@ -52,17 +52,17 @@ void bank_init(bank_t *self,
  *
  * TODO: Add and describe parameters
  */
-void bank_destroy(bank_t *self);
+void bank_destroy(t_bank *self);
 
 /**
  * Sets the frequencies of the bank with an incoming
  * array of floats
  */
-void bank_setFrequencies(bank_t *self, float *vector, uint16_t numFreq);
+void bank_setFrequencies(t_bank *self, float *vector, uint16_t numFreq);
 
 /**
  * Process a single sample from Uexkull
  */
-float bank_process(bank_t *self);
+float bank_process(t_bank *self);
 
 #endif /* BANK_H */

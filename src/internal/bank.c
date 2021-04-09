@@ -2,7 +2,7 @@
 
 #define TEST_LFO_FREQ 0.01
 
-void bank_init(bank_t *self,
+void bank_init(t_bank *self,
     uint16_t numOsc,
     float sampleRate,
     float fund,
@@ -27,12 +27,12 @@ void bank_init(bank_t *self,
     }
 }
 
-void bank_destroy(bank_t *self)
+void bank_destroy(t_bank *self)
 {
     free(self->osc);
 }
 
-void bank_setFrequencies(bank_t *self, float *vector, uint16_t numFreq)
+void bank_setFrequencies(t_bank *self, float *vector, uint16_t numFreq)
 {
     self->_fund = vector[0];
 
@@ -42,7 +42,7 @@ void bank_setFrequencies(bank_t *self, float *vector, uint16_t numFreq)
     }
 }
 
-float bank_process(bank_t *self)
+float bank_process(t_bank *self)
 {
     float sig = 0;
 
