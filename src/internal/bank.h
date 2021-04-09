@@ -58,7 +58,7 @@ void bank_destroy(bank_t *self);
  * Sets the frequencies of the bank with an incoming
  * array of floats
  */
-void bank_setFrequencies(bank_t *self, double *vector, uint16_t numFreq);
+void bank_setFrequencies(bank_t *self, float *vector, uint16_t numFreq);
 
 /**
  * Process a single sample from Uexkull

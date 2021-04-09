@@ -32,10 +32,10 @@ void bank_destroy(bank_t *self)
     free(self->osc);
 }
 
-void bank_setFrequencies(bank_t *self, double *vector, uint16_t numFreq)
+void bank_setFrequencies(bank_t *self, float *vector, uint16_t numFreq)
 {
     self->_fund = vector[0];
-    
+
     for (int i = 0; i < numFreq; i++)
     {
         osc_time(&(self->osc[i]), (float)(vector[i] / (self->_sampleRate / 2)));
@@ -48,8 +48,10 @@ float bank_process(bank_t *self)
 
     for (int i = 0; i < self->_numOsc; i++)
     {
-        sig += osc_step(&(self->osc[i]), 0) / self->_numOsc;
+        sig += osc_step(&(self->osc[i]), 0);
     }
+
+    sig /= self->_numOsc;
 
     return sig;
 }
