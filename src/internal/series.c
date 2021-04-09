@@ -4,7 +4,7 @@
 void series_init(t_series *self, uint16_t numElements, generator_t f)
 {
     self->_numElements = numElements;
-    self->_vector = (double *)calloc(self->_numElements, sizeof(double));
+    self->_vector = (float *)calloc(self->_numElements, sizeof(float));
     self->_f = f;
 }
 
@@ -16,7 +16,7 @@ void series_destroy(t_series *self)
 void series_setNumElements(t_series *self, uint16_t numElements)
 {
     self->_numElements = numElements;
-    self->_vector = (double *)calloc(self->_numElements, sizeof(double));
+    self->_vector = (float *)calloc(self->_numElements, sizeof(float));
 }
 
 void series_setSeries(t_series *self, generator_t f)
@@ -24,13 +24,13 @@ void series_setSeries(t_series *self, generator_t f)
     self->_f = f;
 }
 
-double* series_getSeries(t_series *self)
+float *series_getSeries(t_series *self)
 {
     return self->_vector;
 }
 
 
-void series_process(t_series *self, double firstElement)
+void series_process(t_series *self, float firstElement)
 {
     self->_vector[0] = firstElement;
     self->_f(self->_vector, self->_numElements);
