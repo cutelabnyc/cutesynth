@@ -21,6 +21,7 @@ extern "C" {
     void rampsmooth_init(t_rampsmooth *self, uint8_t buffer_size);
     void rampsmooth_appendSample(t_rampsmooth *self, t_sample sample);
     t_sample rampsmooth_process(t_rampsmooth *self);
+    t_sample rampsmooth_processExponential(t_rampsmooth *self, float smoothFact, t_sample sample);
 
 #ifdef __cplusplus
 }

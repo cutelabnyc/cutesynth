@@ -42,13 +42,13 @@ void bank_setFrequencies(t_bank *self, float *vector, uint16_t numFreq)
     }
 }
 
-float bank_process(t_bank *self)
+float bank_process(t_bank *self, float *gainValues)
 {
     float sig = 0;
 
     for (int i = 0; i < self->_numOsc; i++)
     {
-        sig += osc_step(&(self->osc[i]), 0);
+        sig += (osc_step(&(self->osc[i]), 0) * gainValues[i]);
     }
 
     sig /= self->_numOsc;

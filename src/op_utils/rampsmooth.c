@@ -10,12 +10,8 @@ void rampsmooth_init(t_rampsmooth *self, uint8_t buffer_size)
 
 void rampsmooth_appendSample(t_rampsmooth *self, t_sample sample)
 {
-    // if (self->counter > self->buffer_size - 1){
-    //     Error_Handler();
-    // }
-
     self->buffer[self->counter] = sample;
-    self->counter++;
+    self->counter = (self->counter + 1) % self->buffer_size;
 }
 
 
@@ -26,6 +22,11 @@ t_sample rampsmooth_process(t_rampsmooth *self)
     {
         avg += self->buffer[i];
     }
-    self->counter = 0;
     return avg / self->buffer_size;
+}
+
+t_sample rampsmooth_processExponential(t_rampsmooth *self, float smoothFact, t_sample sample)
+{
+    self->buffer[0] = ((1.0f - smoothFact) * sample) + (smoothFact * self->buffer[0]);
+    return self->buffer[0];
 }

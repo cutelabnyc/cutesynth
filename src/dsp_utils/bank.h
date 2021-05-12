@@ -56,6 +56,6 @@ void bank_setFrequencies(t_bank *self, float *vector, uint16_t numFreq);
 /**
  * Process a single sample from Uexkull
  */
-float bank_process(t_bank *self);
+float bank_process(t_bank *self, float *gainValues);
 
 #endif /* BANK_H */
