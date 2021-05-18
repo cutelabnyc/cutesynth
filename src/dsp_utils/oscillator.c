@@ -73,6 +73,6 @@ float osc_step(osc_t *self, float fm)
     float fbase = (float)LUT_SIZE_HALF * self->id;
     uint16_t base = (uint16_t)fbase;
     float mix = fbase - (float)base;
-    float lut = cos_lut[base];
-    return (lut + mix * (cos_lut[base + 1] - lut));
+    float lut = cos_lut_fixed16[base];
+    return (lut + mix * (cos_lut_fixed16[base + 1] - lut));
 }
