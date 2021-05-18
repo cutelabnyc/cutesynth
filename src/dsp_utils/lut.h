@@ -12,15 +12,12 @@ extern "C"
     extern const int16_t cos_lut_fixed8[];
     extern const int32_t cos_lut_fixed16[];
 
-    extern const float saw_lut[];
     extern const int16_t saw_lut_fixed8[];
     extern const int32_t saw_lut_fixed16[];
 
-    extern const float square_lut[];
     extern const int16_t square_lut_fixed8[];
     extern const int32_t square_lut_fixed16[];
 
-    extern const float tri_lut[];
     extern const int16_t tri_lut_fixed8[];
     extern const int32_t tri_lut_fixed16[];
 

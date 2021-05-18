@@ -20,16 +20,18 @@ extern "C"
     {
         float rate;
         float id;
+
         int16_t zero_x;
         waveform_t waveform;
     } osc_t;
 
     // initialization
-    void osc_init(osc_t *self);
+    void osc_init(osc_t *self, waveform_t waveform);
 
     // input fns
     void osc_time(osc_t *self, float time);
     void osc_reset(osc_t *self);
+    void osc_setWaveform(osc_t *self, waveform_t waveform);
 
     // status
     int16_t osc_get_zero_crossing(osc_t *self);

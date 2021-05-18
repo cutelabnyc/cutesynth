@@ -23,7 +23,7 @@ void bank_init(t_bank *self,
 
     for (int i = 0; i < numOsc; i++)
     {
-        osc_init(&self->osc[i]);
+        osc_init(&self->osc[i], SIN);
     }
 }
 

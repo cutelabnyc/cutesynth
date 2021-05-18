@@ -6,12 +6,12 @@
 #include <math.h>
 
 // initialization
-void osc_init(osc_t *self)
+void osc_init(osc_t *self, waveform_t waveform)
 {
     self->rate = 0.02f;
     self->id = 0.0f;
     self->zero_x = 1;
-    self->waveform = SIN;
+    self->waveform = waveform;
 }
 
 float _lim_f_n1_1(float in)
@@ -35,6 +35,11 @@ void osc_reset(osc_t *self)
     self->zero_x = 1;
 }
 
+void osc_setWaveform(osc_t *self, waveform_t waveform)
+{
+    self->waveform = waveform;
+}
+
 // status
 int16_t osc_get_zero_crossing(osc_t *self)
 {
@@ -43,7 +48,6 @@ int16_t osc_get_zero_crossing(osc_t *self)
 
 // nb: incrementers run 0-1 w/ zero cross at 0.5
 // single-sample
-// NOTE: bigger lookup table and no interpolation
 float osc_step(osc_t *self, float fm)
 {
     float odd = self->id;
@@ -73,6 +77,6 @@ float osc_step(osc_t *self, float fm)
     float fbase = (float)LUT_SIZE_HALF * self->id;
     uint16_t base = (uint16_t)fbase;
     float mix = fbase - (float)base;
-    float lut = cos_lut_fixed16[base];
-    return (lut + mix * (cos_lut_fixed16[base + 1] - lut));
+    float lut = saw_lut_fixed16[base];
+    return (lut + mix * (saw_lut_fixed16[base + 1] - lut));
 }
