@@ -19,11 +19,11 @@ void bank_init(t_bank *self,
     /*modular_t _modular;*/
     self->_1vo = 0;
 
-    self->waveform = SIN;
+    self->waveform = waveform;
 
     for (int i = 0; i < numOsc; i++)
     {
-        osc_init(&self->osc[i], SIN);
+        osc_init(&self->osc[i], self->waveform);
     }
 }
 

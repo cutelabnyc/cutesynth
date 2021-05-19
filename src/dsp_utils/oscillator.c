@@ -14,18 +14,13 @@ void osc_init(osc_t *self, waveform_t waveform)
     self->waveform = waveform;
 }
 
-float _lim_f_n1_1(float in)
+static float _lim_f_n1_1(float in)
 {
     return (in < -1.0f ? -1.0f : in > 1.0f ? 1.0f : in);
 }
 
-// input fns
-// expect 0-1, but can accept through -1 for TZ effects
 void osc_time(osc_t *self, float time_)
 {
-    // 1.0 = sample_rate
-    // 0.0 = stopped
-    // -1. = inverse SR
     self->rate = _lim_f_n1_1(time_);
 }
 
@@ -35,25 +30,38 @@ void osc_reset(osc_t *self)
     self->zero_x = 1;
 }
 
-void osc_setWaveform(osc_t *self, waveform_t waveform)
+static uint32_t _osc_getSample(osc_t *self, uint16_t base)
 {
-    self->waveform = waveform;
+    switch (self->waveform){
+    case SIN:
+        return cos_lut_fixed16[base];
+        break;
+    case TRI:
+        return tri_lut_fixed16[base];
+        break;
+    case SAW:
+        return saw_lut_fixed16[base];
+        break;
+    case SQUARE:
+        return square_lut_fixed16[base];
+        break;
+    default:
+        return cos_lut_fixed16[base];
+        break;
+    }
 }
 
-// status
 int16_t osc_get_zero_crossing(osc_t *self)
 {
     return (self->zero_x);
 }
 
-// nb: incrementers run 0-1 w/ zero cross at 0.5
-// single-sample
+
 float osc_step(osc_t *self, float fm)
 {
     float odd = self->id;
     self->id += self->rate + fm;
 
-    // edge & zero-cross detection
     if (self->id >= 2.0f)
     {
         self->id -= 2.0f;
@@ -73,10 +81,10 @@ float osc_step(osc_t *self, float fm)
         self->zero_x = 0;
     }
 
-    // lookup table w/ linear interpolation
+    // Lookup table w/ linear interpolation
     float fbase = (float)LUT_SIZE_HALF * self->id;
     uint16_t base = (uint16_t)fbase;
     float mix = fbase - (float)base;
-    float lut = saw_lut_fixed16[base];
-    return (lut + mix * (saw_lut_fixed16[base + 1] - lut));
+    float lut = osc_getSample(self, base);
+    return (lut + mix * (osc_getSample(self, base + 1) - lut));
 }
