@@ -85,6 +85,6 @@ float osc_step(osc_t *self, float fm)
     float fbase = (float)LUT_SIZE_HALF * self->id;
     uint16_t base = (uint16_t)fbase;
     float mix = fbase - (float)base;
-    float lut = osc_getSample(self, base);
-    return (lut + mix * (osc_getSample(self, base + 1) - lut));
+    float lut = _osc_getSample(self, base);
+    return (lut + mix * (_osc_getSample(self, base + 1) - lut));
 }
