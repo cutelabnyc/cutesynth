@@ -2,7 +2,7 @@
 #define OSCILLATOR_H
 
 #include <stdint.h>
-#include "lut.h"
+#include "lut/lut.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -27,6 +27,7 @@ extern "C"
     void osc_init(osc_t *self, waveform_t waveform);
     void osc_time(osc_t *self, float time);
     void osc_reset(osc_t *self);
+    void osc_setWaveform(osc_t *self, waveform_t waveform);
     int16_t osc_get_zero_crossing(osc_t *self);
 
     float osc_step(osc_t *self, float fm);

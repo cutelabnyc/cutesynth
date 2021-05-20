@@ -8,7 +8,6 @@ extern "C"
 {
 #endif
 
-    extern const float cos_lut[];
     extern const uint16_t cos_lut_fixed8[];
     extern const uint32_t cos_lut_fixed16[];
 

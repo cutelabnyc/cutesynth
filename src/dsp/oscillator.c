@@ -30,7 +30,12 @@ void osc_reset(osc_t *self)
     self->zero_x = 1;
 }
 
-static uint32_t _osc_getSample(osc_t *self, uint16_t base)
+void osc_setWaveform(osc_t *self, waveform_t waveform)
+{
+    self->waveform = waveform;
+}
+
+static uint16_t _osc_getSample(osc_t *self, uint16_t base)
 {
     switch (self->waveform){
     case SIN:
