@@ -8,17 +8,17 @@ extern "C"
 {
 #endif
 
-    extern const uint16_t cos_lut_fixed8[];
-    extern const uint32_t cos_lut_fixed16[];
+    extern const uint16_t cos_lut_uint8[];
+    extern const uint32_t cos_lut_uint16[];
 
-    extern const uint16_t saw_lut_fixed8[];
-    extern const uint32_t saw_lut_fixed16[];
+    extern const uint16_t saw_lut_uint8[];
+    extern const uint32_t saw_lut_uint16[];
 
-    extern const uint16_t square_lut_fixed8[];
-    extern const uint32_t square_lut_fixed16[];
+    extern const uint16_t square_lut_uint8[];
+    extern const uint32_t square_lut_uint16[];
 
-    extern const uint16_t tri_lut_fixed8[];
-    extern const uint32_t tri_lut_fixed16[];
+    extern const uint16_t tri_lut_uint8[];
+    extern const uint32_t tri_lut_uint16[];
 
 #ifdef __cplusplus
 }

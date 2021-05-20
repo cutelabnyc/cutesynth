@@ -39,19 +39,19 @@ static uint16_t _osc_getSample(osc_t *self, uint16_t base)
 {
     switch (self->waveform){
     case SIN:
-        return cos_lut_fixed16[base];
+        return cos_lut_uint16[base];
         break;
     case TRI:
-        return tri_lut_fixed16[base];
+        return tri_lut_uint16[base];
         break;
     case SAW:
-        return saw_lut_fixed16[base];
+        return saw_lut_uint16[base];
         break;
     case SQUARE:
-        return square_lut_fixed16[base];
+        return square_lut_uint16[base];
         break;
     default:
-        return cos_lut_fixed16[base];
+        return cos_lut_uint16[base];
         break;
     }
 }
