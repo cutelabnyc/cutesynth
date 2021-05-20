@@ -38,9 +38,6 @@ void osc_setWaveform(osc_t *self, waveform_t waveform)
 static uint16_t _osc_getSample(osc_t *self, uint16_t base)
 {
     switch (self->waveform){
-    case SIN:
-        return cos_lut_uint16[base];
-        break;
     case TRI:
         return tri_lut_uint16[base];
         break;
@@ -50,8 +47,9 @@ static uint16_t _osc_getSample(osc_t *self, uint16_t base)
     case SQUARE:
         return square_lut_uint16[base];
         break;
+    case SIN:
     default:
-        return cos_lut_uint16[base];
+        return sin_lut_uint16[base];
         break;
     }
 }
