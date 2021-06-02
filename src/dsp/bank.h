@@ -54,6 +54,11 @@ void bank_destroy(t_bank *self);
 void bank_setFrequencies(t_bank *self, float *frequencies, uint16_t numFreq);
 
 /**
+ * Set waveform for all oscillators in bank
+ */
+void bank_setWaveform(t_bank *self, waveform_t waveform);
+
+/**
  * Process a single sample from Uexkull
  */
 float bank_process(t_bank *self, float *gainValues);

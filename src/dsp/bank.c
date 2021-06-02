@@ -42,6 +42,14 @@ void bank_setFrequencies(t_bank *self, float *frequencies, uint16_t numFreq)
     }
 }
 
+void bank_setWaveform(t_bank *self, waveform_t waveform)
+{
+    for (int i = 0; i < self->_numOsc; i++)
+    {
+        osc_setWaveform(&(self->osc[i]), SAW);
+    }
+}
+
 float bank_process(t_bank *self, float *gainValues)
 {
     float sig = 0;
