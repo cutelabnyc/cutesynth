@@ -46,7 +46,7 @@ void bank_setWaveform(t_bank *self, waveform_t waveform)
 {
     for (int i = 0; i < self->_numOsc; i++)
     {
-        osc_setWaveform(&(self->osc[i]), SAW);
+        osc_setWaveform(&(self->osc[i]), waveform);
     }
 }
 
