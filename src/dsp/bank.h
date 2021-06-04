@@ -62,6 +62,6 @@ void bank_setWaveform(t_bank *self, waveform_t waveform);
 /**
  * Process a single sample from Uexkull
  */
-float bank_process(t_bank *self, float *gainValues);
+float bank_process(t_bank *self, float *gainValues, float *gainCurve);
 
 #endif /* BANK_H */

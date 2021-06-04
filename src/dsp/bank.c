@@ -53,13 +53,13 @@ void bank_setWaveform(t_bank *self, waveform_t waveform)
     }
 }
 
-float bank_process(t_bank *self, float *gainValues)
+float bank_process(t_bank *self, float *lfoValues, float *gainCurve)
 {
     float sig = 0;
 
     for (int i = 0; i < self->_numOsc; i++)
     {
-        sig += (osc_step(&(self->osc[i]), 0) * gainValues[i]);
+        sig += (osc_step(&(self->osc[i]), 0) * lfoValues[i]) * gainCurve[i];
     }
 
     sig /= self->_numOsc;
