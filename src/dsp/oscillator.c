@@ -35,7 +35,7 @@ void osc_setWaveform(osc_t *self, waveform_t waveform)
     self->waveform = waveform;
 }
 
-static uint16_t _osc_getSample(osc_t *self, uint16_t base)
+static float _osc_getSample(osc_t *self, uint16_t base)
 {
     switch (self->waveform){
     case TRI:

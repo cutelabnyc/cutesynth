@@ -32,9 +32,12 @@ void bank_destroy(t_bank *self)
     free(self->osc);
 }
 
-void bank_setFrequencies(t_bank *self, float *frequencies, uint16_t numFreq)
+void bank_setFrequencies(t_bank *self, float *frequencies, uint16_t numFreq, bool isLFO)
 {
-    self->_fund = frequencies[0];
+    if (!isLFO)
+    {
+        self->_fund = frequencies[0];
+    }
 
     for (int i = 0; i < numFreq; i++)
     {
@@ -42,13 +45,21 @@ void bank_setFrequencies(t_bank *self, float *frequencies, uint16_t numFreq)
     }
 }
 
-float bank_process(t_bank *self, float *gainValues)
+void bank_setWaveform(t_bank *self, waveform_t waveform)
+{
+    for (int i = 0; i < self->_numOsc; i++)
+    {
+        osc_setWaveform(&(self->osc[i]), waveform);
+    }
+}
+
+float bank_process(t_bank *self, float *lfoValues, float *gainCurve)
 {
     float sig = 0;
 
     for (int i = 0; i < self->_numOsc; i++)
     {
-        sig += (osc_step(&(self->osc[i]), 0) * gainValues[i]);
+        sig += (osc_step(&(self->osc[i]), 0) * lfoValues[i]) * gainCurve[i];
     }
 
     sig /= self->_numOsc;

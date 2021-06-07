@@ -8,6 +8,7 @@
 #define BANK_H
 
 #include <stdlib.h>
+#include <stdbool.h>
 #include "oscillator.h"
 
  /**
@@ -51,11 +52,16 @@ void bank_destroy(t_bank *self);
  * Sets the frequencies of the bank with an incoming
  * array of floats
  */
-void bank_setFrequencies(t_bank *self, float *frequencies, uint16_t numFreq);
+void bank_setFrequencies(t_bank *self, float *frequencies, uint16_t numFreq, bool isLFO);
+
+/**
+ * Set waveform for all oscillators in bank
+ */
+void bank_setWaveform(t_bank *self, waveform_t waveform);
 
 /**
  * Process a single sample from Uexkull
  */
-float bank_process(t_bank *self, float *gainValues);
+float bank_process(t_bank *self, float *gainValues, float *gainCurve);
 
 #endif /* BANK_H */
