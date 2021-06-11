@@ -52,7 +52,7 @@ void bank_destroy(t_bank *self);
  * Sets the frequencies of the bank with an incoming
  * array of floats
  */
-void bank_setFrequencies(t_bank *self, float *frequencies, uint16_t numFreq, bool isLFO);
+void bank_setFrequencies(t_bank *self, float *frequencies, float fm, float fmAtten, uint16_t numFreq, bool isLFO);
 
 /**
  * Set waveform for all oscillators in bank
