@@ -1,7 +1,5 @@
 #include "bank.h"
 
-#define TEST_LFO_FREQ 0.01
-
 void bank_init(t_bank *self,
     uint16_t numOsc,
     float sampleRate,
