@@ -39,7 +39,9 @@ void bank_setFrequencies(t_bank *self, float *frequencies, float fm, float fmAtt
 
     for (int i = 0; i < numFreq; i++)
     {
-        osc_time(&(self->osc[i]), (float)((frequencies[i] + ((fm + 0.5f) * frequencies[i] * fmAtten)) / (self->_sampleRate / 2)));
+        // osc_time(&(self->osc[i]), (float)((frequencies[i] + ((fm + 0.5f) * frequencies[i] * fmAtten)) / (self->_sampleRate / 2)));
+        osc_time(&(self->osc[i]), (float)(frequencies[i] / (self->_sampleRate / 2)));
+
     }
 }
 
