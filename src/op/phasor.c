@@ -29,10 +29,11 @@ void phasor_reset(phasor_t *self)
     self->zero_x = 1;
 }
 
-float phasor_step(phasor_t *self, float fm)
+float phasor_step(phasor_t *self, float rate)
 {
     float odd = self->id;
-    self->id += self->rate + fm;
+    self->rate = rate;
+    self->id += self->rate;
 
     if (self->id >= 2.0f)
     {

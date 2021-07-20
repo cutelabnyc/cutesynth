@@ -19,7 +19,7 @@ extern "C"
     void phasor_time(phasor_t *self, float time);
     void phasor_reset(phasor_t *self);
 
-    float phasor_step(phasor_t *self, float fm);
+    float phasor_step(phasor_t *self, float rate);
 
 #ifdef __cplusplus
 }
