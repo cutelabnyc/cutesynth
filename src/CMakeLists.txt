@@ -1,5 +1,5 @@
-file(GLOB SOURCES "./internal/*.c")
+file(GLOB SOURCES ./*/*.c)
 
-add_library(cuteop STATIC ${SOURCES})
+add_library(cutesynth STATIC ${SOURCES})
 
-target_include_directories(cuteop INTERFACE ${CMAKE_CURRENT_LIST_DIR})
+target_include_directories(cutesynth INTERFACE ${CMAKE_CURRENT_LIST_DIR})
