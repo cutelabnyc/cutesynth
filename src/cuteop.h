@@ -10,3 +10,5 @@
 #include "dsp/bank.h"
 #include "op/avg.h"
 #include "op/fb-smooth.h"
+#include "op/phasor.h"
+
