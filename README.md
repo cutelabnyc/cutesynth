@@ -9,7 +9,14 @@ Clone the repo and partake in some good old fashioned cmake fun
 ```
 mkdir build
 cd build
-cmake .
+cmake ..
+```
+
+## Testing
+
+```
+cd build/test
+make
 ```
 
 After that, all you have to do is `#include <cuteop.h>` in your project. Cute-Op can be used as it exists in a git submodule, or your can use it in your own cool way.
