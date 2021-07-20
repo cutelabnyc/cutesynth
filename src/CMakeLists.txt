@@ -1,4 +1,4 @@
-file(GLOB SOURCES "./internal/*.c")
+file(GLOB SOURCES "./op/*.c")
 
 add_library(cuteop STATIC ${SOURCES})
 

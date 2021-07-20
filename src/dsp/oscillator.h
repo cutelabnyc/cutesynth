@@ -13,7 +13,8 @@ extern "C"
         SIN,
         SAW,
         SQUARE,
-        TRI
+        TRI,
+        PHASOR
     } waveform_t;
 
     typedef struct osc
