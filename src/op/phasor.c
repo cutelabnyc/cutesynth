@@ -29,6 +29,11 @@ void phasor_reset(phasor_t *self)
     self->zero_x = 1;
 }
 
+void phasor_phase(phasor_t *self, float id)
+{
+    self->id += id;
+}
+
 float phasor_step(phasor_t *self, float rate)
 {
     float odd = self->id;
