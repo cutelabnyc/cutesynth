@@ -45,9 +45,9 @@ float phasor_step(phasor_t *self, float rate)
     self->rate = rate;
     self->id += self->rate;
 
-    if (self->id >= 2.0f)
+    if (self->id >= 1.0f)
     {
-        self->id -= 2.0f;
+        self->id -= 1.0f;
         self->zero_x = 1; // ZERO
     }
     else if ((self->id >= 1.0f) && (odd < 1.0f))
@@ -56,7 +56,7 @@ float phasor_step(phasor_t *self, float rate)
     }
     else if (self->id < 0.0f)
     {
-        self->id += 2.0f;
+        self->id += 1.0f;
         self->zero_x = 1; // ZERO
     }
     else
