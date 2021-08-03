@@ -18,6 +18,7 @@ extern "C"
     void phasor_init(phasor_t *self);
     void phasor_time(phasor_t *self, float time);
     void phasor_reset(phasor_t *self);
+    int16_t phasor_getZeroCrossing(phasor_t *self);
     void phasor_phase(phasor_t *self, float id);
 
     float phasor_step(phasor_t *self, float rate);

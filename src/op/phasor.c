@@ -34,6 +34,11 @@ void phasor_phase(phasor_t *self, float id)
     self->id += id;
 }
 
+int16_t phasor_getZeroCrossing(phasor_t *self)
+{
+    return self->zero_x;
+}
+
 float phasor_step(phasor_t *self, float rate)
 {
     float odd = self->id;
