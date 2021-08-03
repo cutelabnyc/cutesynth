@@ -11,6 +11,4 @@
 #include "op/avg.h"
 #include "op/fb-smooth.h"
 #include "op/phasor.h"
-#include "modules/missed-opportunities/opportunity.h"
-#include "modules/messd-up/messd.h"
-#include "modules/uexkull/uexkull.h"
+
