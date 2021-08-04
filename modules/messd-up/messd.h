@@ -11,7 +11,7 @@
 #define MESSD_H
 
 #include <stdbool.h>
-#include <cuteop.h>
+#include "../../src/cuteop.h"
 
 #define NUM_DIVISION_VALUES 10
  /**
@@ -19,16 +19,16 @@
   */
 typedef struct messd
 {
-	phasor_t p_clock;
-	phasor_t p_downbeat;
-	phasor_t p_subdivision;
+    phasor_t p_clock;
+    phasor_t p_downbeat;
+    phasor_t p_subdivision;
 
-	t_edge subEdge;
-	t_edge downEdge;
+    t_edge subEdge;
+    t_edge downEdge;
 
-	uint8_t downbeat;
-	uint8_t subdivision;
-	float theta;
+    uint8_t downbeat;
+    uint8_t subdivision;
+    float theta;
 } messd_t;
 
 /**
@@ -47,15 +47,15 @@ void MS_destroy(messd_t *self);
  * TODO: Make a struct for I/O to simplify this?
  */
 void MS_process(messd_t *self,
-	uint16_t *clock_in,
-	uint16_t *clock_out,
-	uint16_t *downbeat_in,
-	uint16_t *downbeat_out,
-	uint16_t *subdivision_in,
-	uint16_t *subdivision_out,
-	uint16_t *phase_in,
-	uint16_t *phase_out,
-	bool metric_modulation);
+    uint16_t *clock_in,
+    uint16_t *clock_out,
+    uint16_t *downbeat_in,
+    uint16_t *downbeat_out,
+    uint16_t *subdivision_in,
+    uint16_t *subdivision_out,
+    uint16_t *phase_in,
+    uint16_t *phase_out,
+    bool metric_modulation);
 
 
 #endif /* MESSD_H */

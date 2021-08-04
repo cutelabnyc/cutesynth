@@ -1,4 +1,4 @@
-#include <channel.h>
+#include "channel.h"
 #include <time.h>
 
 void CH_init(channel_t *self, uint16_t v_max, uint16_t v_cutoff, uint16_t hysteresis, uint16_t random_seed)

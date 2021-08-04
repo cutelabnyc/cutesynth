@@ -11,15 +11,15 @@
 #define CHANNEL_H
 
 #include <stdint.h>
-#include <cuteop.h>
+#include "../../src/cuteop.h"
 #include <stdbool.h>
 
-/**
- * channel_t: Struct containing CV threshold variables
- * and unique [probability_t] data for each I/O channel
- *
- * TODO: Add and describe parameters
- */
+ /**
+  * channel_t: Struct containing CV threshold variables
+  * and unique [probability_t] data for each I/O channel
+  *
+  * TODO: Add and describe parameters
+  */
 typedef struct channel
 {
     t_thresh _input_thresh;
@@ -66,9 +66,9 @@ void CH_reset_random(channel_t *self, uint16_t seed);
  * TODO: Add and describe parameters
  */
 void CH_process(channel_t *self,
-                uint16_t *in,
-                uint16_t *prob,
-                uint16_t *out,
-                uint16_t *missed_opportunities);
+    uint16_t *in,
+    uint16_t *prob,
+    uint16_t *out,
+    uint16_t *missed_opportunities);
 
 #endif /* CHANNEL_H */
