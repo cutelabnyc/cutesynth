@@ -1,4 +1,4 @@
-#include <opportunity.h>
+#include "opportunity.h"
 #include <stdlib.h>
 #include <math.h>
 
@@ -8,8 +8,8 @@
 
 static void _reset_random_sequence(opportunity_t *self, uint16_t random_seed, bool doResetAutopulse)
 {
-	if (doResetAutopulse)
-		autopulse_reset(&self->_autopulse, random_seed);
+    if (doResetAutopulse)
+        autopulse_reset(&self->_autopulse, random_seed);
     for (int i = 0; i < self->num_channels; i++)
     {
         CH_reset_random(self->channel + i, random_seed + i);
@@ -17,11 +17,11 @@ static void _reset_random_sequence(opportunity_t *self, uint16_t random_seed, bo
 }
 
 void OP_init(opportunity_t *self,
-             uint8_t num_channels,
-             uint16_t v_max,
-             uint16_t v_cutoff,
-             uint8_t hysteresis,
-             unsigned int random_seed)
+    uint8_t num_channels,
+    uint16_t v_max,
+    uint16_t v_cutoff,
+    uint8_t hysteresis,
+    unsigned int random_seed)
 {
     // Allocates the number of channels
     self->channel = (channel_t *)malloc(sizeof(channel_t) * num_channels);
@@ -30,7 +30,7 @@ void OP_init(opportunity_t *self,
     // Initialize threshold and edge for reset seed inlet
     thresh_init(&self->_reset_thresh, v_cutoff, hysteresis);
     autopulse_init(&self->_autopulse, random_seed);
-	autopulse_set_minimum_interval(&self->_autopulse, 25);
+    autopulse_set_minimum_interval(&self->_autopulse, 25);
 
     // Sets all the default values from [/include/globals.h]
     self->num_channels = num_channels;
@@ -38,16 +38,16 @@ void OP_init(opportunity_t *self,
     self->v_cutoff = v_cutoff;
     self->hysteresis = hysteresis;
     self->random_seed = random_seed;
-	self->reset_high = false;
+    self->reset_high = false;
 
     // Initialize each channel
     for (int i = 0; i < num_channels; i++)
     {
         CH_init(&self->channel[i],
-                self->v_max,
-                v_cutoff,
-                self->hysteresis,
-                self->random_seed);
+            self->v_max,
+            v_cutoff,
+            self->hysteresis,
+            self->random_seed);
 
         // Initialize probability values
         self->probability[i] = 0;
@@ -77,47 +77,49 @@ static void _OP_process_reset(opportunity_t *self, uint16_t *reset)
 
     // // Reset random value sequence if an edge is detected from reset inlet
     // if (postThresh && !self->reset_high)
-	if (postThresh)
+    if (postThresh)
     {
         _reset_random_sequence(self, self->random_seed, !self->reset_high);
     }
 
-	self->reset_high = postThresh;
+    self->reset_high = postThresh;
 }
 
 static void _OP_process_density(opportunity_t *self, uint16_t *density)
 {
     uint16_t autopulseDensity;
 
-	float base_probability = ((float) *density) / (float) DENSITY_RANGE;
-	uint16_t scaled_probability = powf(base_probability, 0.75) * DENSITY_RANGE;
+    float base_probability = ((float)*density) / (float)DENSITY_RANGE;
+    uint16_t scaled_probability = powf(base_probability, 0.75) * DENSITY_RANGE;
 
-	for (int i = 0; i < self->num_channels; i++)
+    for (int i = 0; i < self->num_channels; i++)
     {
         if (self->channel[i]._edge._last != 1)
         {
-			self->probability[i] = scaled_probability;
-		}
-	}
+            self->probability[i] = scaled_probability;
+        }
+    }
 
     autopulseDensity = *density;
 
     double scaleFactor = (double)autopulseDensity / (double)self->v_max;
-	double autopulseRange;
-	double autopulseOffset;
-	if (scaleFactor < AUTO_PPS_ROLLOFF_LOW) {
-		autopulseRange = (MIN_AUTO_PPS - 0);
-		scaleFactor /= AUTO_PPS_ROLLOFF_LOW;
-		autopulseOffset = 0;
-	} else if (scaleFactor > AUTO_PPS_ROLLOFF_HIGH) {
-		autopulseRange = (CRAZY_AUTO_PPS - MAX_AUTO_PPS);
-		scaleFactor = (scaleFactor - AUTO_PPS_ROLLOFF_HIGH) / (1.0 - AUTO_PPS_ROLLOFF_HIGH);
-		autopulseOffset = MAX_AUTO_PPS;
-	} else {
-		autopulseRange = (MAX_AUTO_PPS - MIN_AUTO_PPS);
-		scaleFactor = (scaleFactor - AUTO_PPS_ROLLOFF_LOW) / (1.0 - (AUTO_PPS_ROLLOFF_HIGH - AUTO_PPS_ROLLOFF_LOW));
-		autopulseOffset = MIN_AUTO_PPS;
-	}
+    double autopulseRange;
+    double autopulseOffset;
+    if (scaleFactor < AUTO_PPS_ROLLOFF_LOW) {
+        autopulseRange = (MIN_AUTO_PPS - 0);
+        scaleFactor /= AUTO_PPS_ROLLOFF_LOW;
+        autopulseOffset = 0;
+    }
+    else if (scaleFactor > AUTO_PPS_ROLLOFF_HIGH) {
+        autopulseRange = (CRAZY_AUTO_PPS - MAX_AUTO_PPS);
+        scaleFactor = (scaleFactor - AUTO_PPS_ROLLOFF_HIGH) / (1.0 - AUTO_PPS_ROLLOFF_HIGH);
+        autopulseOffset = MAX_AUTO_PPS;
+    }
+    else {
+        autopulseRange = (MAX_AUTO_PPS - MIN_AUTO_PPS);
+        scaleFactor = (scaleFactor - AUTO_PPS_ROLLOFF_LOW) / (1.0 - (AUTO_PPS_ROLLOFF_HIGH - AUTO_PPS_ROLLOFF_LOW));
+        autopulseOffset = MIN_AUTO_PPS;
+    }
     autopulse_set_pulses_per_second(&self->_autopulse, scaleFactor * autopulseRange + autopulseOffset);
 }
 
@@ -128,21 +130,21 @@ static void _OP_process_CV(opportunity_t *self, uint16_t *input, uint16_t *outpu
     {
         // Process the channel array and send the probability gates
         CH_process(&self->channel[i],
-                   &input[i],
-                   &self->probability[i],
-                   &output[i],
-                   i < self->num_channels - 1 ? &missed_opportunities[i] : NULL);
+            &input[i],
+            &self->probability[i],
+            &output[i],
+            i < self->num_channels - 1 ? &missed_opportunities[i] : NULL);
     }
 }
 
 void OP_process(opportunity_t *self,
-                uint16_t *input,
-                uint16_t *output,
-                uint16_t *reset,
-                uint16_t *density,
-                uint16_t *autopulse,
-                uint16_t *missed_opportunities,
-                uint16_t msec)
+    uint16_t *input,
+    uint16_t *output,
+    uint16_t *reset,
+    uint16_t *density,
+    uint16_t *autopulse,
+    uint16_t *missed_opportunities,
+    uint16_t msec)
 {
     // Process reset input
     _OP_process_reset(self, reset);
