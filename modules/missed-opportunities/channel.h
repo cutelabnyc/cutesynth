@@ -11,7 +11,7 @@
 #define CHANNEL_H
 
 #include <stdint.h>
-#include "../../src/cuteop.h"
+#include "../../src/cutesynth.h"
 #include <stdbool.h>
 
  /**

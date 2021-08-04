@@ -17,7 +17,7 @@
 #define NUM_DIFFRACTION_CONSTANTS 5
 #define NUM_WAVEFORMS 4
 
-#include "../../src/cuteop.h"
+#include "../../src/cutesynth.h"
 
  /**
  * uexkull_t: Module's main data structure

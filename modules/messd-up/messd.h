@@ -11,7 +11,7 @@
 #define MESSD_H
 
 #include <stdbool.h>
-#include "../../src/cuteop.h"
+#include "../../src/cutesynth.h"
 
 #define NUM_DIVISION_VALUES 10
  /**
