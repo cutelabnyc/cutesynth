@@ -1,5 +1,8 @@
-file(GLOB MODULE_SOURCES ./*/*.c)
+add_library(MissedOpportunities STATIC missed-opportunities/opportunity.c)
+target_include_directories(MissedOpportunities PUBLIC missed-opportunities)
 
-add_library(cutemodules STATIC ${MODULE_SOURCES})
+add_library(MessdUp STATIC messd-up/messd.c)
+target_include_directories(MessdUp PUBLIC messd-up)
 
-target_include_directories(cutemodules PUBLIC ${CMAKE_CURRENT_LIST_DIR})
+add_library(Uexkull STATIC uexkull/uexkull.c)
+target_include_directories(Uexkull PUBLIC uexkull)
