@@ -12,11 +12,6 @@
 #include "op/fb-smooth.h"
 #include "op/phasor.h"
 
-
-// TODO: Use function pointers
-void IT_init();
-void IT_process();
-
 #if MESSD_UP
 #include "messd-up/messd.h"
 #elif MISSED_OPPORTUNITIES
