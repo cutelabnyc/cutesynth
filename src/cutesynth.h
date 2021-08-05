@@ -19,26 +19,6 @@ void IT_process();
 
 #if MESSD_UP
 #include "messd-up/messd.h"
-
-void IT_init()
-{
-    MS_init(&messd);
-}
-
-void IT_process()
-{
-    MS_process(&messd,
-        &CLOCK_in,
-        &CLOCK_out,
-        &DOWNBEAT_in,
-        &DOWNBEAT_out,
-        &SUBDIVISION_in,
-        &SUBDIVISION_out,
-        &PHASE_in,
-        &PHASE_out,
-        METRIC_MODULATION_in);
-}
-
 #elif MISSED_OPPORTUNITIES
 #include "missed-opportunities/opportunity.h"
 #elif UEXKULL
