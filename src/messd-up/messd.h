@@ -14,6 +14,7 @@
 #include "../../src/cutesynth.h"
 
 #define NUM_DIVISION_VALUES 10
+
  /**
   * messd_t: Module's main data structure
   */
@@ -30,6 +31,19 @@ typedef struct messd
     uint8_t subdivision;
     float theta;
 } messd_t;
+
+
+messd_t messd;
+
+uint16_t CLOCK_in;
+uint16_t CLOCK_out;
+uint16_t DOWNBEAT_in;
+uint16_t DOWNBEAT_out;
+uint16_t SUBDIVISION_in;
+uint16_t SUBDIVISION_out;
+uint16_t PHASE_in;
+uint16_t PHASE_out;
+bool METRIC_MODULATION_in;
 
 /**
  * Initialize the 'messd' struct

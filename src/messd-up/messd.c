@@ -72,3 +72,24 @@ void MS_process(messd_t *self,
     self->theta = ((float)*phase_in / 1024);
     *phase_out = fmod(phasor + self->theta, 2) > 1;
 }
+
+/* ======================================================= */
+
+void IT_init()
+{
+    MS_init(&messd);
+}
+
+void IT_process()
+{
+    MS_process(&messd,
+        &CLOCK_in,
+        &CLOCK_out,
+        &DOWNBEAT_in,
+        &DOWNBEAT_out,
+        &SUBDIVISION_in,
+        &SUBDIVISION_out,
+        &PHASE_in,
+        &PHASE_out,
+        METRIC_MODULATION_in);
+}
