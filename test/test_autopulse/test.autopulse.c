@@ -1,6 +1,6 @@
 #include <unity.h>
 
-#include <cuteop.h>
+#include <cutesynth.h>
 
 t_autopulse ap;
 

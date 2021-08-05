@@ -1,4 +1,4 @@
-#include <cuteop.h>
+#include <cutesynth.h>
 #include <unity.h>
 #include <test_util.h>
 
