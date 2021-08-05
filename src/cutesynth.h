@@ -12,3 +12,10 @@
 #include "op/fb-smooth.h"
 #include "op/phasor.h"
 
+#if MESSD_UP
+#include "messd-up/messd.h"
+#elif MISSED_OPPORTUNITIES
+#include "missed-opportunities/opportunity.h"
+#elif UEXKULL
+#include "uexkull/uexkull.h"
+#endif
