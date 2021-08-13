@@ -38,15 +38,15 @@ typedef pin_t *GPIO_t;
 (*MAIN_init_f)(void *) = &MS_init;
 (*MAIN_process_f)(void *, uint16_t *) = &MS_process;
 
-GPIO_t GPIO[NUM_ARGS] = { { A6, INPUT },
-                            { 4, OUTPUT },
-                            { A3, INPUT },
-                            { 12, OUTPUT },
-                            { A4, INPUT },
-                            { 10, OUTPUT },
-                            { A7, INPUT },
-                            { 8, OUTPUT },
-                            { 7, INPUT }
+GPIO_t GPIO[NUM_ARGS] = { { A6, INPUT }, // CLOCK_KNOB
+                            { 4, OUTPUT }, // CLOCK_OUT
+                            { A3, INPUT }, // DOWNBEAT_IN
+                            { 12, OUTPUT }, // DOWNBEAT_OUT
+                            { A4, INPUT }, // SUBDIVISION_IN
+                            { 10, OUTPUT }, // SUBDIVISION_OUT
+                            { A7, INPUT }, // PHASE_IN
+                            { 8, OUTPUT }, // PHASE_OUT
+                            { 7, INPUT } // METRIC_MODULATION
 }
 
 #elif MISSED_OPPORTUNITIES
