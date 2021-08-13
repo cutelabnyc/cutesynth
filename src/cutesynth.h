@@ -20,12 +20,34 @@
 void(*MAIN_init_f)(void *);
 void(*MAIN_process_f)(void *, uint16_t *);
 
+typedef struct pin
+{
+    uint8_t pin;
+    bool type;
+} pin_t;
+
+typedef pin_t *GPIO_t;
+
+
 #if MESSD_UP
 #include "messd-up/messd.h"
+
+#define NUM_ARGS 9
 
 // Define init, process, arg array size
 (*MAIN_init_f)(void *) = &MS_init;
 (*MAIN_process_f)(void *, uint16_t *) = &MS_process;
+
+GPIO_t GPIO[NUM_ARGS] = { { A6, INPUT },
+                            { 4, OUTPUT },
+                            { A3, INPUT },
+                            { 12, OUTPUT },
+                            { A4, INPUT },
+                            { 10, OUTPUT },
+                            { A7, INPUT },
+                            { 8, OUTPUT },
+                            { 7, INPUT }
+}
 
 #elif MISSED_OPPORTUNITIES
 #include "missed-opportunities/opportunity.h"
