@@ -20,7 +20,16 @@ void MS_destroy(messd_t *self)
 {
 }
 
-void MS_process(messd_t *self, uint16_t *args)
+void MS_process(messd_t *self,
+    uint16_t *clock_in,
+    double *clock_out,
+    uint16_t *downbeat_in,
+    uint16_t *downbeat_out,
+    uint16_t *subdivision_in,
+    uint16_t *subdivision_out,
+    uint16_t *phase_in,
+    uint16_t *phase_out,
+    bool metric_modulation)
 {
     uint16_t CLOCK_in, CLOCK_out, DOWNBEAT_in, DOWNBEAT_out;
     uint16_t SUBDIVISION_in, SUBDIVISION_out, PHASE_in, PHASE_out, METRIC_MODULATION_in;
@@ -46,20 +55,24 @@ void MS_process(messd_t *self, uint16_t *args)
         tempo = (tempo * (float)self->subdivision) / (float)self->downbeat;
     }
 
-    phasor = phasor_step(&self->p_clock, tempo);
-    CLOCK_out = (phasor <= 0.5);
+//    phasor = phasor_step(&self->p_clock, tempo);
+    *clock_out = phasor_step(&self->p_clock, tempo);
 
     // Check for clock edges to latch downbeat onto
     uint16_t postEdge;
-    edge_process(&self->downEdge, CLOCK_out, &postEdge);
+    edge_process(&self->downEdge, clock_out, &postEdge);
+    
+    *clock_out = postEdge;
 
     if (CLOCK_out)
     {
         self->downbeat = ((float)DOWNBEAT_in / 1024.0) * NUM_DIVISION_VALUES;
     }
+    
+    phasor = phasor_step(&self->p_downbeat, tempo / (float)self->downbeat);
 
     // Process downbeat tempo
-    DOWNBEAT_out = phasor_step(&self->p_downbeat, tempo / (float)self->downbeat);
+    *downbeat_out = (phasor <= 0.5);
 
     // Check for downbeat edges to latch subdivisions onto
     edge_process(&self->subEdge, DOWNBEAT_out, &postEdge);
