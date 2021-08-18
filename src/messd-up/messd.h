@@ -28,8 +28,8 @@ typedef struct messd
     t_edge subEdge;
     t_edge downEdge;
 
-    float downbeat;
-    float subdivision;
+    uint8_t downbeat;
+    uint8_t subdivision;
     float theta;
 } messd_t;
 
@@ -49,13 +49,13 @@ void MS_destroy(messd_t *self);
  * TODO: Make a struct for I/O to simplify this?
  */
 void MS_process(messd_t *self,
-    uint16_t *clock_in,
+    double *clock_in,
     double *clock_out,
-    uint16_t *downbeat_in,
+    double *downbeat_in,
     double *downbeat_out,
-    uint16_t *subdivision_in,
+    double *subdivision_in,
     double *subdivision_out,
-    uint16_t *phase_in,
+    double *phase_in,
     double *phase_out,
     bool metric_modulation);
 

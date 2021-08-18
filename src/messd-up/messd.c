@@ -1,5 +1,6 @@
 #include "messd.h"
 #include <stdlib.h>
+#include <stdio.h>
 #include <math.h>
 
 void MS_init(messd_t *self)
@@ -22,18 +23,18 @@ void MS_destroy(messd_t *self)
 }
 
 void MS_process(messd_t *self,
-    uint16_t *clock_in,
+    double *clock_in,
     double *clock_out,
-    uint16_t *downbeat_in,
+    double *downbeat_in,
     double *downbeat_out,
-    uint16_t *subdivision_in,
+    double *subdivision_in,
     double *subdivision_out,
-    uint16_t *phase_in,
+    double *phase_in,
     double *phase_out,
     bool metric_modulation)
 {
     // Calculate clock based on tempo in
-    float tempo = ((float)*clock_in / (float)UINT16_MAX);
+    float tempo = (*clock_in / (float)UINT16_MAX);
     double phasor = 0;
     float dutyCycle = 0.5f;
 
@@ -50,7 +51,7 @@ void MS_process(messd_t *self,
     // If beats per measure changes, check for tempo tick to latch a new downbeat onto
     if (*clock_out)
     {
-        self->downbeat = ((float)*downbeat_in / 1024.0) * NUM_DIVISION_VALUES;
+        self->downbeat = (*downbeat_in / 1024.0) * NUM_DIVISION_VALUES;
     }
     
     // Calculate downbeat
@@ -61,7 +62,7 @@ void MS_process(messd_t *self,
     // If subdivisions number changes, check for downbeat edge to latch new subdivision onto
     if (*downbeat_out)
     {
-        self->subdivision = ((float)*subdivision_in / 1024.0) * NUM_DIVISION_VALUES;
+        self->subdivision = (*subdivision_in / 1024.0) * NUM_DIVISION_VALUES;
     }
 
     // Calculate subdivisions
@@ -69,6 +70,6 @@ void MS_process(messd_t *self,
     edge_process(&self->subEdge, &phasor, subdivision_out);
 
     // Process phased output
-    self->theta = ((float)*phase_in / 1024);
+    self->theta = (*phase_in / 1024);
     *phase_out = fmod(phasor + self->theta, 1) > 1;
 }
