@@ -24,11 +24,12 @@ typedef struct messd
     phasor_t p_downbeat;
     phasor_t p_subdivision;
 
+    t_edge phaseEdge;
     t_edge subEdge;
     t_edge downEdge;
 
-    uint8_t downbeat;
-    uint8_t subdivision;
+    float downbeat;
+    float subdivision;
     float theta;
 } messd_t;
 
@@ -51,11 +52,11 @@ void MS_process(messd_t *self,
     uint16_t *clock_in,
     double *clock_out,
     uint16_t *downbeat_in,
-    uint16_t *downbeat_out,
+    double *downbeat_out,
     uint16_t *subdivision_in,
-    uint16_t *subdivision_out,
+    double *subdivision_out,
     uint16_t *phase_in,
-    uint16_t *phase_out,
+    double *phase_out,
     bool metric_modulation);
 
 
