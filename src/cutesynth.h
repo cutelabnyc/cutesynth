@@ -30,8 +30,8 @@ typedef void (*MAIN_process_f)(void *, uint16_t *);
 #define NUM_ARGS (NUM_INPUTS + NUM_OUTPUTS)
 
 // Define init, process, arg array size
-MAIN_init_f = &MS_init;
-MAIN_process_f = &MS_process;
+MAIN_init_f = MS_init;
+MAIN_process_f = MS_process;
 
 #elif MISSED_OPPORTUNITIES
 #include "missed-opportunities/opportunity.h"
