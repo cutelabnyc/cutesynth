@@ -26,13 +26,12 @@
 #define NUM_OUTPUTS 4
 #define NUM_ARGS (NUM_INPUTS + NUM_OUTPUTS)
 
-typedef void (*MAIN_init_f)(messd_t *);
-typedef void (*MAIN_process_f)(messd_t *, uint16_t *);
+ // typedef void (*MAIN_init_f)(messd_t *);
+ // typedef void (*MAIN_process_f)(messd_t *, uint16_t *);
 
-
-// Define init, process, arg array size
-MAIN_init_f = MS_init;
-MAIN_process_f = MS_process;
+ // Define init, process, arg array size
+// MAIN_init_f = MS_init;
+// MAIN_process_f = MS_process;
 
 #elif MISSED_OPPORTUNITIES
 #include "missed-opportunities/opportunity.h"
