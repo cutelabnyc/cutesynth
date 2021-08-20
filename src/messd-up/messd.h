@@ -11,7 +11,8 @@
 #define MESSD_H
 
 #include <stdbool.h>
-#include "../../src/cutesynth.h"
+#include "../op/phasor.h"
+#include "../op/edge.h"
 
 #define NUM_DIVISION_VALUES 10
 
@@ -33,6 +34,18 @@ typedef struct messd
     float theta;
 } messd_t;
 
+typedef enum {
+    CLOCK_KNOB,
+    CLOCK_OUT,
+    DOWNBEAT_IN,
+    DOWNBEAT_OUT,
+    SUBDIVISION_IN,
+    SUBDIVISION_OUT,
+    PHASE_IN,
+    PHASE_OUT,
+    METRIC_MODULATION
+} params_t;
+
 /**
  * Initialize the 'messd' struct
  * */
@@ -45,19 +58,7 @@ void MS_destroy(messd_t *self);
 
 /**
  * Processes the incoming CV data in main.cpp
- *
- * TODO: Make a struct for I/O to simplify this?
  */
-void MS_process(messd_t *self,
-    double *clock_in,
-    double *clock_out,
-    double *downbeat_in,
-    double *downbeat_out,
-    double *subdivision_in,
-    double *subdivision_out,
-    double *phase_in,
-    double *phase_out,
-    bool metric_modulation);
-
+void MS_process(messd_t *self, double **ins, double **outs);
 
 #endif /* MESSD_H */

@@ -22,54 +22,45 @@ void MS_destroy(messd_t *self)
 {
 }
 
-void MS_process(messd_t *self,
-    double *clock_in,
-    double *clock_out,
-    double *downbeat_in,
-    double *downbeat_out,
-    double *subdivision_in,
-    double *subdivision_out,
-    double *phase_in,
-    double *phase_out,
-    bool metric_modulation)
+void MS_process(messd_t *self, double **ins, double **outs)
 {
     // Calculate clock based on tempo in
-    float tempo = (*clock_in / (float)UINT16_MAX);
+    float tempo = (*ins[CLOCK_KNOB] / (float)UINT16_MAX);
     double phasor = 0;
     float dutyCycle = 0.5f;
 
     // Check for metric modulation
-    if (metric_modulation)
+    if (*ins[METRIC_MODULATION])
     {
         tempo = (tempo * self->subdivision) / self->downbeat;
     }
 
     // Calculate initial tempo tick
     phasor = phasor_step(&self->p_clock, tempo);
-    edge_process(&self->phaseEdge, &phasor, clock_out);
-    
+    edge_process(&self->phaseEdge, &phasor, outs[CLOCK_OUT]);
+
     // If beats per measure changes, check for tempo tick to latch a new downbeat onto
-    if (*clock_out)
+    if (*outs[CLOCK_OUT])
     {
-        self->downbeat = (*downbeat_in / 1024.0) * NUM_DIVISION_VALUES;
+        self->downbeat = (*ins[DOWNBEAT_IN] / 1024.0) * NUM_DIVISION_VALUES;
     }
-    
+
     // Calculate downbeat
     phasor = phasor_step(&self->p_downbeat, tempo / self->downbeat);
-    edge_process(&self->downEdge, &phasor, downbeat_out);
-    
-    
+    edge_process(&self->downEdge, &phasor, outs[DOWNBEAT_OUT]);
+
+
     // If subdivisions number changes, check for downbeat edge to latch new subdivision onto
-    if (*downbeat_out)
+    if (*outs[DOWNBEAT_OUT])
     {
-        self->subdivision = (*subdivision_in / 1024.0) * NUM_DIVISION_VALUES;
+        self->subdivision = (*ins[SUBDIVISION_IN] / 1024.0) * NUM_DIVISION_VALUES;
     }
 
     // Calculate subdivisions
     phasor = phasor_step(&self->p_subdivision, (tempo * self->subdivision) / self->downbeat);
-    edge_process(&self->subEdge, &phasor, subdivision_out);
+    edge_process(&self->subEdge, &phasor, outs[SUBDIVISION_OUT]);
 
     // Process phased output
-    self->theta = (*phase_in / 1024);
-    *phase_out = fmod(phasor + self->theta, 1) > 1;
+    self->theta = (*ins[PHASE_IN] / 1024);
+    *outs[PHASE_OUT] = fmod(phasor + self->theta, 1) > 1;
 }
