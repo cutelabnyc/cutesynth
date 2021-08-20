@@ -17,9 +17,6 @@
  * functions, initializes in hardware files
  */
 
-typedef void (*MAIN_init_f)(void *);
-typedef void (*MAIN_process_f)(void *, uint16_t *);
-
 
 #if MESSD_UP
 
@@ -28,6 +25,10 @@ typedef void (*MAIN_process_f)(void *, uint16_t *);
 #define NUM_INPUTS 5
 #define NUM_OUTPUTS 4
 #define NUM_ARGS (NUM_INPUTS + NUM_OUTPUTS)
+
+typedef void (*MAIN_init_f)(messd_t *);
+typedef void (*MAIN_process_f)(messd_t *, uint16_t *);
+
 
 // Define init, process, arg array size
 MAIN_init_f = MS_init;
