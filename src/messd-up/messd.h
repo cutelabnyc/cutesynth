@@ -36,15 +36,18 @@ typedef struct messd
 
 typedef enum {
     CLOCK_KNOB,
-    CLOCK_OUT,
     DOWNBEAT_IN,
-    DOWNBEAT_OUT,
     SUBDIVISION_IN,
-    SUBDIVISION_OUT,
     PHASE_IN,
-    PHASE_OUT,
     METRIC_MODULATION
-} params_t;
+} ins_t;
+
+typedef enum {
+    CLOCK_OUT,
+    DOWNBEAT_OUT,
+    SUBDIVISION_OUT,
+    PHASE_OUT,
+} outs_t;
 
 /**
  * Initialize the 'messd' struct
@@ -59,6 +62,6 @@ void MS_destroy(messd_t *self);
 /**
  * Processes the incoming CV data in main.cpp
  */
-void MS_process(messd_t *self, double **ins, double **outs);
+void MS_process(messd_t *self, double *ins, double *outs);
 
 #endif /* MESSD_H */
