@@ -11,7 +11,6 @@
 #include "op/avg.h"
 #include "op/fb-smooth.h"
 #include "op/phasor.h"
-#include "messd-up/messd.h"
 
 /**
  * Function pointers to main init/process
@@ -20,6 +19,7 @@
 
 
 #if MESSD_UP
+#include "messd-up/messd.h"
 
 
 #define NUM_INPUTS 5
