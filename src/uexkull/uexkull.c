@@ -1,5 +1,5 @@
 #include "uexkull.h"
-#include "../../src/cutesynth.h"
+// #include "../../src/cutesynth.h"
 
 /**
 * _UX_diffractionSeries:
