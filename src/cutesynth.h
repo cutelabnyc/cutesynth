@@ -28,6 +28,15 @@
 
 #define NUM_PIN_PARAMS 3
 
+// Struct representing a single pin
+typedef struct pin
+{
+    uint8_t pin;
+    uint8_t mode;
+    bool isAnalog;
+} pin_t;
+
+
 /**
  * Function pointers to main init/process
  * functions, initializes in hardware files
@@ -42,8 +51,9 @@
 
 messd_t messd;
 
-// Input table to be turned into pin_t* in the devkit
-uint8_t input_table[NUM_INPUTS][NUM_PIN_PARAMS] = {
+// TODO: how to define these as pin_t?
+// GPIO struct for hardware IO
+pin_t GPIO_in[NUM_INPUTS] = {
     {A6, INPUT, ANALOG}, // Clock In
     {A3, INPUT, ANALOG}, // Downbeat in
     {A4, INPUT, ANALOG}, // Subdivision in
@@ -51,8 +61,7 @@ uint8_t input_table[NUM_INPUTS][NUM_PIN_PARAMS] = {
     {7, INPUT, DIGITAL}   // Metric Modulation
 };
 
-// Output table to be turned into pin_t* in the devkit
-uint8_t output_table[NUM_OUTPUTS][NUM_PIN_PARAMS] = {
+pin_t GPIO_out[NUM_OUTPUTS] = {
     {4, OUTPUT, DIGITAL},  // Clock out,
     {12, OUTPUT, DIGITAL}, // Downbeat out
     {10, OUTPUT, DIGITAL}, // Subdivision out,
