@@ -26,7 +26,7 @@ messd_t messd;
 void (*MAIN_init_f)(messd_t *);
 void (*MAIN_process_f)(messd_t *, double *, double *);
 
-void f_pointer_init()
+void MAIN_fpointers_init()
 {
     // Define init, process, arg array size
     MAIN_init_f = MS_init;
