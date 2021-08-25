@@ -19,8 +19,8 @@
 
 
 #if MESSD_UP
-#include "messd-up/messd.h"
 
+#include "messd-up/messd.h"
 
 #define NUM_INPUTS 5
 #define NUM_OUTPUTS 4

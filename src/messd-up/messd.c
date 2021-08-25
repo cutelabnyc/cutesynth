@@ -57,7 +57,7 @@ void MS_process(messd_t *self, double *ins, double *outs)
     if (outs[DOWNBEAT_OUT])
     {
         // self->subdivision = ((ins[SUBDIVISION_IN] / 1024.0) * NUM_DIVISION_VALUES) + 1;
-        self->subdivision = 4;
+        self->subdivision = 10;
     }
 
     // Calculate subdivisions
