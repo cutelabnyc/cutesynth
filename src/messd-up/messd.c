@@ -9,9 +9,10 @@ void MS_init(messd_t *self)
     phasor_init(&self->p_downbeat);
     phasor_init(&self->p_subdivision);
 
-    edge_init(&self->phaseEdge);
+    edge_init(&self->clockEdge);
     edge_init(&self->downEdge);
     edge_init(&self->subEdge);
+    edge_init(&self->phaseEdge);
 
     self->downbeat = 1;
     self->subdivision = 1;
@@ -40,7 +41,7 @@ void MS_process(messd_t *self, double *ins, double *outs)
 
     // Calculate initial tempo tick
     clock = phasor_step(&self->p_clock, tempo);
-    edge_process(&self->phaseEdge, &clock, &outs[CLOCK_OUT]);
+    edge_process(&self->clockEdge, &clock, &outs[CLOCK_OUT]);
 
     // If beats per measure changes, check for tempo tick to latch a new downbeat onto
     if (outs[CLOCK_OUT])

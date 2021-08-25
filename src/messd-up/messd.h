@@ -25,9 +25,10 @@ typedef struct messd
     phasor_t p_downbeat;
     phasor_t p_subdivision;
 
-    t_edge phaseEdge;
+    t_edge clockEdge;
     t_edge subEdge;
     t_edge downEdge;
+    t_edge phaseEdge;
 
     uint8_t downbeat;
     uint8_t subdivision;
