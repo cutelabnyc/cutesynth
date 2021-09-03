@@ -9,11 +9,6 @@ void MS_init(messd_t *self)
     phasor_init(&self->p_downbeat);
     phasor_init(&self->p_subdivision);
 
-    edge_init(&self->clockEdge);
-    edge_init(&self->downEdge);
-    edge_init(&self->subEdge);
-    edge_init(&self->phaseEdge);
-
     self->downbeat = 1;
     self->subdivision = 1;
     self->theta = 0.0f;
@@ -41,32 +36,33 @@ void MS_process(messd_t *self, double *ins, double *outs)
 
     // Calculate initial tempo tick
     clock = phasor_step(&self->p_clock, tempo);
-    edge_process(&self->clockEdge, &clock, &outs[CLOCK_OUT]);
+    outs[CLOCK_OUT] = (clock < 0.5) ? 1 : 0;
 
     // If beats per measure changes, check for tempo tick to latch a new downbeat onto
     if (outs[CLOCK_OUT])
     {
+        self->theta = (ins[PHASE_IN] / 1024.0f);
+
         // self->downbeat = ((ins[DOWNBEAT_IN] / 1024.0) * NUM_DIVISION_VALUES) + 1;
         self->downbeat = 3;
     }
 
     // Calculate downbeat
     downbeat = phasor_step(&self->p_downbeat, tempo / self->downbeat);
-    edge_process(&self->downEdge, &downbeat, &outs[DOWNBEAT_OUT]);
+    outs[DOWNBEAT_OUT] = (downbeat < 0.5) ? 1 : 0;
 
     // If subdivisions number changes, check for downbeat edge to latch new subdivision onto
     if (outs[DOWNBEAT_OUT])
     {
         // self->subdivision = ((ins[SUBDIVISION_IN] / 1024.0) * NUM_DIVISION_VALUES) + 1;
-        self->subdivision = 10;
+        self->subdivision = 7;
     }
 
     // Calculate subdivisions
     subdivision = phasor_step(&self->p_subdivision, (tempo * self->subdivision) / self->downbeat);
-    edge_process(&self->subEdge, &subdivision, &outs[SUBDIVISION_OUT]);
+    outs[SUBDIVISION_OUT] = (subdivision < 0.5) ? 1 : 0;
 
     // Process phased output
-    self->theta = (ins[PHASE_IN] / 1024.0f);
     phasor = fmod(clock + self->theta, 1.0f);
-    edge_process(&self->phaseEdge, &phasor, &outs[PHASE_OUT]);
+    outs[PHASE_OUT] = (phasor < 0.5) ? 1 : 0;
 }
