@@ -12,6 +12,9 @@ void MS_init(messd_t *self)
     self->downbeat = 1;
     self->subdivision = 1;
     self->theta = 0.0f;
+
+    self->downbeat_flag = true;
+    self->subdivision_flag = true;
 }
 
 void MS_destroy(messd_t *self)
@@ -41,10 +44,15 @@ void MS_process(messd_t *self, double *ins, double *outs)
     // If beats per measure changes, check for tempo tick to latch a new downbeat onto
     if (outs[CLOCK_OUT])
     {
-        self->theta = (ins[PHASE_IN] / 1024.0f);
-
-        // self->downbeat = ((ins[DOWNBEAT_IN] / 1024.0) * NUM_DIVISION_VALUES) + 1;
-        self->downbeat = 3;
+        if (self->downbeat_flag)
+        {
+            self->theta = (ins[PHASE_IN] / 1024.0f);
+            self->downbeat = ((ins[DOWNBEAT_IN] / 1024.0) * NUM_DIVISION_VALUES) + 1;
+            self->downbeat_flag = false;
+        }
+    }
+    else {
+        self->downbeat_flag = true;
     }
 
     // Calculate downbeat
@@ -54,8 +62,14 @@ void MS_process(messd_t *self, double *ins, double *outs)
     // If subdivisions number changes, check for downbeat edge to latch new subdivision onto
     if (outs[DOWNBEAT_OUT])
     {
-        // self->subdivision = ((ins[SUBDIVISION_IN] / 1024.0) * NUM_DIVISION_VALUES) + 1;
-        self->subdivision = 7;
+        if (self->downbeat_flag)
+        {
+            self->subdivision = ((ins[SUBDIVISION_IN] / 1024.0) * NUM_DIVISION_VALUES) + 1;
+            self->subdivision_flag = false;
+        }
+    }
+    else {
+        self->subdivision_flag = true;
     }
 
     // Calculate subdivisions

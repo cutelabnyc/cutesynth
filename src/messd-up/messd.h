@@ -27,6 +27,10 @@ typedef struct messd
 
     uint8_t downbeat;
     uint8_t subdivision;
+
+    bool downbeat_flag;
+    bool subdivision_flag;
+
     float theta;
 } messd_t;
 
