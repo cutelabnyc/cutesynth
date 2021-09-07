@@ -29,7 +29,6 @@ typedef struct messd
     uint8_t subdivision;
     
     float truncate;
-    float pulse_width;
     float theta;
 
     bool downbeat_flag;
