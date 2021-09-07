@@ -27,23 +27,30 @@ typedef struct messd
 
     uint8_t downbeat;
     uint8_t subdivision;
+    
+    float truncate;
+    float pulse_width;
+    float theta;
 
     bool downbeat_flag;
     bool subdivision_flag;
 
-    float theta;
 } messd_t;
 
 typedef enum {
-    CLOCK_KNOB,
+    TEMPO_KNOB,
     DOWNBEAT_IN,
     SUBDIVISION_IN,
     PHASE_IN,
-    METRIC_MODULATION
+    METRIC_MODULATION,
+    BEAT_LATCH,
+    TRUNCATE,
+    INVERT,
+    PULSE_WIDTH
 } ins_t;
 
 typedef enum {
-    CLOCK_OUT,
+    BEAT_OUT,
     DOWNBEAT_OUT,
     SUBDIVISION_OUT,
     PHASE_OUT,

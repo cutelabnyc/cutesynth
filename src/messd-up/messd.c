@@ -12,6 +12,9 @@ void MS_init(messd_t *self)
     self->downbeat = 1;
     self->subdivision = 1;
     self->theta = 0.0f;
+    
+    self->truncate = 0;
+    self->pulse_width = 0.5;
 
     self->downbeat_flag = true;
     self->subdivision_flag = true;
@@ -24,12 +27,21 @@ void MS_destroy(messd_t *self)
 void MS_process(messd_t *self, double *ins, double *outs)
 {
     // Calculate clock based on tempo in
-    float tempo = (ins[CLOCK_KNOB] / (float)UINT16_MAX);
+    float tempo = (ins[TEMPO_KNOB] / (float)UINT16_MAX);
+    bool latch = (ins[BEAT_LATCH] ? outs[DOWNBEAT_OUT] : outs[BEAT_OUT]);
 
-    double clock = 0;
+    double beat = 0;
     double downbeat = 0;
     double subdivision = 0;
     double phasor = 0;
+        
+    // Check for inversion
+    if (ins[INVERT])
+    {
+        uint8_t dummy = self->downbeat;
+        self->downbeat = self->subdivision;
+        self->subdivision = dummy;
+    }
 
     // Check for metric modulation
     if (ins[METRIC_MODULATION])
@@ -37,46 +49,41 @@ void MS_process(messd_t *self, double *ins, double *outs)
         tempo = (tempo * self->subdivision) / (float)self->downbeat;
     }
 
-    // Calculate initial tempo tick
-    clock = phasor_step(&self->p_clock, tempo);
-    outs[CLOCK_OUT] = (clock < 0.5) ? 1 : 0;
-
-    // If beats per measure changes, check for tempo tick to latch a new downbeat onto
-    if (outs[CLOCK_OUT])
+    if (outs[DOWNBEAT_OUT])
     {
+        // If beats per measure changes, check for tempo tick to latch a new downbeat onto
         if (self->downbeat_flag)
         {
             self->theta = (ins[PHASE_IN] / 1024.0f);
             self->downbeat = ((ins[DOWNBEAT_IN] / 1024.0) * NUM_DIVISION_VALUES) + 1;
             self->downbeat_flag = false;
         }
-    }
-    else {
-        self->downbeat_flag = true;
-    }
-
-    // Calculate downbeat
-    downbeat = phasor_step(&self->p_downbeat, tempo / self->downbeat);
-    outs[DOWNBEAT_OUT] = (downbeat < 0.5) ? 1 : 0;
-
-    // If subdivisions number changes, check for downbeat edge to latch new subdivision onto
-    if (outs[DOWNBEAT_OUT])
-    {
-        if (self->downbeat_flag)
+        
+        // If subdivisions number changes, check for downbeat edge to latch new subdivision onto
+        if (self->subdivision_flag)
         {
             self->subdivision = ((ins[SUBDIVISION_IN] / 1024.0) * NUM_DIVISION_VALUES) + 1;
             self->subdivision_flag = false;
         }
     }
     else {
+        self->downbeat_flag = true;
         self->subdivision_flag = true;
     }
+    
+    // Calculate initial tempo tick
+    beat = phasor_step(&self->p_clock, tempo);
+    outs[BEAT_OUT] = (beat < self->pulse_width) ? 1 : 0;
+
+    // Calculate downbeat
+    downbeat = phasor_step(&self->p_downbeat, tempo / self->downbeat);
+    outs[DOWNBEAT_OUT] = (downbeat < self->pulse_width) ? 1 : 0;
 
     // Calculate subdivisions
     subdivision = phasor_step(&self->p_subdivision, (tempo * self->subdivision) / self->downbeat);
-    outs[SUBDIVISION_OUT] = (subdivision < 0.5) ? 1 : 0;
+    outs[SUBDIVISION_OUT] = (subdivision < self->pulse_width) ? 1 : 0;
 
     // Process phased output
-    phasor = fmod(clock + self->theta, 1.0f);
-    outs[PHASE_OUT] = (phasor < 0.5) ? 1 : 0;
+    phasor = fmod(beat + self->theta, 1.0f);
+    outs[PHASE_OUT] = (phasor < self->pulse_width) ? 1 : 0;
 }
