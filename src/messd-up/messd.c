@@ -6,88 +6,68 @@
 void MS_init(messd_t *self)
 {
     phasor_init(&self->p_clock);
-    phasor_init(&self->p_downbeat);
-    phasor_init(&self->p_subdivision);
 
-    self->downbeat = 1;
-    self->subdivision = 1;
-    self->theta = 0.0f;
-    
-    self->truncate = 0;
+    self->beatsPerMeasure = 1;
+    self->subdivisionsPerMeasure = 0;
 
-    self->downbeat_flag = true;
-    self->subdivision_flag = true;
+    self->beatKonducta = 0;
+    self->lastBeatPhase = 1;
+    self->tempoScale = 1;
 }
 
 void MS_destroy(messd_t *self)
 {
 }
 
-static void _MS_scale(double *ins)
+static void _MS_updateParams(messd_t *self, messd_ins_t *ins)
 {
-    ins[TEMPO_KNOB] = (ins[TEMPO_KNOB] > 0 ? ins[TEMPO_KNOB] : 1);
-    ins[DOWNBEAT_IN] = (ins[DOWNBEAT_IN] > 0 ? ins[DOWNBEAT_IN] : 1);
-    ins[SUBDIVISION_IN] = (ins[SUBDIVISION_IN] > 0 ? ins[SUBDIVISION_IN] : 1);
-    ins[PHASE_IN] = (ins[PHASE_IN] <= 1 && ins[PHASE_IN] >= 0  ? ins[PHASE_IN] : 0);
-    ins[PULSE_WIDTH] = (ins[PULSE_WIDTH] < 1 && ins[PULSE_WIDTH] > 0  ? ins[PULSE_WIDTH] : 0.5);
+    // Check for metric modulation
+    // NOTE: come back to this!
+    // if (ins->metricModulation)
+    // {
+    //     self->tempoScale *= (float)ins->subdivisionsPerMeasure / (float)ins->beatsPerMeasure;
+    // }
+
+    self->beatsPerMeasure = ins->beatsPerMeasure;
+    self->subdivisionsPerMeasure = ins->subdivisionsPerMeasure;
 }
 
-void MS_process(messd_t *self, double *ins, double *outs)
+void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
 {
     // Calculate clock based on tempo in
-    float tempo = (ins[TEMPO_KNOB] / (float)UINT16_MAX);
-//    bool latch = (ins[BEAT_LATCH] ? outs[DOWNBEAT_OUT] : outs[BEAT_OUT]);
-    bool latch = outs[DOWNBEAT_OUT];
+    float phaseDelta = ((ins->tempo * self->tempoScale) * ins->delta) / MS_PER_MINUTE;
 
-    double beat = 0;
-    double downbeat = 0;
+    double beatPhase = 0;
+    double measurePhase = 0;
     double subdivision = 0;
     double phasor = 0;
-        
-    _MS_scale(ins);
-        
-    // Check for metric modulation
-    if (ins[METRIC_MODULATION])
-    {
-        tempo = (tempo * self->subdivision) / (float)self->downbeat;
-    }
-    
-    // Check param changes
-    if (latch)
-    {
-        // If beats per measure changes, check for tempo tick to latch a new downbeat onto
-        if (self->downbeat_flag)
-        {
-            self->theta = ins[PHASE_IN];
-            self->downbeat = ins[DOWNBEAT_IN];
-            self->downbeat_flag = false;
-        }
-        
-        // If subdivisions number changes, check for downbeat edge to latch new subdivision onto
-        if (self->subdivision_flag)
-        {
-            self->subdivision = ins[SUBDIVISION_IN];
-            self->subdivision_flag = false;
-        }
-    }
-    else {
-        self->downbeat_flag = true;
-        self->subdivision_flag = true;
-    }
-    
+
     // Calculate initial tempo tick
-    beat = phasor_step(&self->p_clock, tempo);
-    outs[BEAT_OUT] = (beat < ins[PULSE_WIDTH]) ? 1 : 0;
+    beatPhase = phasor_step(&self->p_clock, phaseDelta);
+    outs->beat = beatPhase < ins->pulseWidth;
+
+    if (self->lastBeatPhase > beatPhase)
+    {
+        self->beatKonducta++;
+        if (!(ins->latchToDownbeat && (self->beatKonducta % self->beatsPerMeasure != 0)))
+        {
+            _MS_updateParams(self, ins);
+        }
+    }
 
     // Calculate downbeat
-    downbeat = phasor_step(&self->p_downbeat, tempo / self->downbeat);
-    outs[DOWNBEAT_OUT] = (downbeat < ins[PULSE_WIDTH]) ? 1 : 0;
+    measurePhase = beatPhase + (self->beatKonducta % self->beatsPerMeasure);
+    measurePhase /= self->beatsPerMeasure;
+    outs->downbeat = measurePhase < ins->pulseWidth;
 
     // Calculate subdivisions
-    subdivision = phasor_step(&self->p_subdivision, (tempo * self->subdivision) / self->downbeat);
-    outs[SUBDIVISION_OUT] = (subdivision < ins[PULSE_WIDTH]) ? 1 : 0;
+    subdivision = fmod(measurePhase * self->subdivisionsPerMeasure, 1.0f);
+    outs->subdivision = subdivision < ins->pulseWidth;
 
     // Process phased output
-    phasor = fmod(beat + self->theta, 1.0f);
-    outs[PHASE_OUT] = (phasor < ins[PULSE_WIDTH]) ? 1 : 0;
+    phasor = fmod(beatPhase + ins->phase, 1.0f);
+    outs->phase = phasor < ins->pulseWidth;
+
+    self->lastBeatPhase = beatPhase;
+
 }

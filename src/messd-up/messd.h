@@ -15,6 +15,7 @@
 #include "../op/edge.h"
 
 #define NUM_DIVISION_VALUES 10
+#define MS_PER_MINUTE 60000
 
  /**
   * messd_t: Module's main data structure
@@ -22,38 +23,39 @@
 typedef struct messd
 {
     phasor_t p_clock;
-    phasor_t p_downbeat;
-    phasor_t p_subdivision;
 
-    uint8_t downbeat;
-    uint8_t subdivision;
-    
-    float truncate;
-    float theta;
+    uint8_t beatsPerMeasure;
+    uint8_t subdivisionsPerMeasure;
+    uint8_t beatKonducta;
+    double lastBeatPhase;
 
-    bool downbeat_flag;
-    bool subdivision_flag;
-
+    double tempoScale;
 } messd_t;
 
-typedef enum {
-    TEMPO_KNOB,
-    DOWNBEAT_IN,
-    SUBDIVISION_IN,
-    PHASE_IN,
-    METRIC_MODULATION,
-    BEAT_LATCH,
-    TRUNCATE,
-    INVERT,
-    PULSE_WIDTH
-} ins_t;
+typedef struct messd_ins
+{
+    double tempo;
+    uint8_t beatsPerMeasure;
+    uint8_t subdivisionsPerMeasure;
 
-typedef enum {
-    BEAT_OUT,
-    DOWNBEAT_OUT,
-    SUBDIVISION_OUT,
-    PHASE_OUT,
-} outs_t;
+    bool metricModulation;
+    bool latchToDownbeat;
+    bool invert;
+
+    uint8_t wrap;
+    double phase;
+    double pulseWidth;
+
+    double delta;
+} messd_ins_t;
+
+typedef struct messd_outs
+{
+    bool downbeat;
+    bool beat;
+    bool subdivision;
+    bool phase;
+} messd_outs_t;
 
 /**
  * Initialize the 'messd' struct
@@ -68,6 +70,6 @@ void MS_destroy(messd_t *self);
 /**
  * Processes the incoming CV data in main.cpp
  */
-void MS_process(messd_t *self, double *ins, double *outs);
+void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs);
 
 #endif /* MESSD_H */
