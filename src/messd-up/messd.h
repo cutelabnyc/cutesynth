@@ -29,7 +29,11 @@ typedef struct messd
     uint8_t beatKonducta;
     double lastBeatPhase;
 
+    bool invertNeedsReset;
+    bool modulationNeedsReset;
+
     double tempoScale;
+    double previousTempoScale;
 } messd_t;
 
 typedef struct messd_ins
@@ -41,6 +45,8 @@ typedef struct messd_ins
     bool metricModulation;
     bool latchToDownbeat;
     bool invert;
+    bool isRoundTrip;
+    bool reset;
 
     uint8_t wrap;
     double phase;
@@ -55,6 +61,9 @@ typedef struct messd_outs
     bool beat;
     bool subdivision;
     bool phase;
+
+    bool invert;
+    bool modulate;
 } messd_outs_t;
 
 /**

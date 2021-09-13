@@ -13,23 +13,62 @@ void MS_init(messd_t *self)
     self->beatKonducta = 0;
     self->lastBeatPhase = 1;
     self->tempoScale = 1;
+    self->previousTempoScale = 1;
+
+    self->invertNeedsReset = false;
+    self->modulationNeedsReset = false;
 }
 
 void MS_destroy(messd_t *self)
 {
 }
 
-static void _MS_updateParams(messd_t *self, messd_ins_t *ins)
+static void _MS_handleLatch(messd_t *self, messd_ins_t *ins)
 {
-    // Check for metric modulation
-    // NOTE: come back to this!
-    // if (ins->metricModulation)
-    // {
-    //     self->tempoScale *= (float)ins->subdivisionsPerMeasure / (float)ins->beatsPerMeasure;
-    // }
-
+    // Update the beats and the subdivisions
     self->beatsPerMeasure = ins->beatsPerMeasure;
     self->subdivisionsPerMeasure = ins->subdivisionsPerMeasure;
+
+    if (ins->reset)
+    {
+        self->tempoScale = 1;
+    }
+
+    // Check for metric modulation
+    if (ins->metricModulation && !self->modulationNeedsReset)
+    {
+        if (ins->isRoundTrip)
+        {
+            self->previousTempoScale = self->tempoScale;
+        }
+
+        self->tempoScale *= (float)ins->subdivisionsPerMeasure / (float)ins->beatsPerMeasure;
+        self->modulationNeedsReset = true;
+        self->subdivisionsPerMeasure = self->beatsPerMeasure;
+
+        // Set subdivisions equal to beats upon metric modulation
+        ins->subdivisionsPerMeasure = self->beatsPerMeasure;
+    }
+    else if (ins->isRoundTrip) {
+        // Check for roundtrip mode and modulate
+        if (!ins->metricModulation)
+        {
+            self->tempoScale = self->previousTempoScale;
+        }
+    }
+
+    // Check to apply an invert
+    if (ins->invert && !self->invertNeedsReset)
+    {
+        ins->invert = false;
+
+        self->beatsPerMeasure = ins->subdivisionsPerMeasure;
+        self->subdivisionsPerMeasure = ins->beatsPerMeasure;
+        self->invertNeedsReset = true;
+
+        ins->subdivisionsPerMeasure = self->subdivisionsPerMeasure;
+        ins->beatsPerMeasure = self->beatsPerMeasure;
+    }
 }
 
 void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
@@ -51,8 +90,19 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
         self->beatKonducta++;
         if (!(ins->latchToDownbeat && (self->beatKonducta % self->beatsPerMeasure != 0)))
         {
-            _MS_updateParams(self, ins);
+            _MS_handleLatch(self, ins);
         }
+    }
+
+    // Reset metric modulation
+    if (!ins->metricModulation)
+    {
+        self->modulationNeedsReset = false;
+    }
+
+    if (!ins->invert)
+    {
+        self->invertNeedsReset = false;
     }
 
     // Calculate downbeat
