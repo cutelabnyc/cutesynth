@@ -28,12 +28,14 @@ void UX_init(uexkull_t *self, float samplerate)
     for (int i = 0; i < NUM_BANKS; i++)
     {
         bank_init(&self->bank[i],
+            &self->oscs[i],
             NUM_OSC,
             samplerate,
             0.0f,
             SIN);
 
         bank_init(&self->lfo[i],
+            &self->lfoOscs[i],
             NUM_OSC,
             samplerate,
             0.0f,

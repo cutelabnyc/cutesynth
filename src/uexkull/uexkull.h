@@ -26,6 +26,8 @@ typedef struct uexkull
 {
     t_bank bank[NUM_BANKS];
     t_bank lfo[NUM_BANKS];
+    osc_t oscs[NUM_BANKS][NUM_OSC];
+    osc_t lfoOscs[NUM_BANKS][NUM_OSC];
     float freqArray[NUM_BANKS][NUM_OSC];
     float lfoFreqArray[NUM_BANKS][NUM_OSC];
     float _diffractionConstant[NUM_BANKS];

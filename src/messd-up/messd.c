@@ -1,6 +1,5 @@
 #include "messd.h"
-#include <stdlib.h>
-#include <stdio.h>
+
 #include <math.h>
 
 void MS_init(messd_t *self)
@@ -128,5 +127,5 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
 
     // Test
     uint16_t pll_in = ins->ext_clock < 0.5;
-    outs->phase = phase_locked_loop_process(&self->p_locked_loop, pll_in);
+    outs->phase = phase_locked_loop_process(&self->p_locked_loop, &pll_in);
 }
