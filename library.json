@@ -24,5 +24,6 @@
             "src/*.h",
             "modules/*.h"
         ]
-    }
+    },
+    "include": "modules"
 }
