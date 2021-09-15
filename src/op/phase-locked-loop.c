@@ -28,7 +28,7 @@ float phase_locked_loop_process(t_phase_locked_loop *self, uint16_t *in1)
     self->_qref = (self->_qref || (ref && !self->_lastReference)) && reset; // Trigger reference flip-flop on leading edge of reference
     self->_lastReference = ref;
     self->_lastSignal = sig;
-    char errorSignal = self->_qref = self->_qsig;
+    int errorSignal = self->_qref - self->_qsig;
     float filtered_ersig = errorSignal + (errorSignal - self->_lastErrorSignal) * self->_derivative;
     self->_lastErrorSignal = errorSignal;
     self->_frequency = self->_frequency - filtered_ersig * self->_proportion;

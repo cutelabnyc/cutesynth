@@ -12,7 +12,8 @@ typedef struct phase_locked_loop {
     phasor_t _phasor;
     double _proportion;
     double _derivative;
-    char _qsig, _qref, _lastReference, _lastSignal, _lastErrorSignal;
+    char _qsig, _qref, _lastReference, _lastSignal;
+    int _lastErrorSignal;
     double _phase, _frequency;
 } t_phase_locked_loop;
 
