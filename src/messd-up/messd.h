@@ -67,6 +67,7 @@ typedef struct messd_outs
 
     bool invert;
     bool modulate;
+	double test_out;
 } messd_outs_t;
 
 /**
@@ -78,6 +79,11 @@ void MS_init(messd_t *self);
  * Frees the 'messd' struct
  * */
 void MS_destroy(messd_t *self);
+
+/**
+ * Provide a hint for the wavelength of a clock cycle
+ */
+void MS_clock_wavelength_hint(messd_t *self, float hint);
 
 /**
  * Processes the incoming CV data in main.cpp
