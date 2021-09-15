@@ -76,6 +76,11 @@ static void _MS_handleExternalClock(messd_t *self, double reference)
 
 }
 
+void MS_clock_wavelength_hint(messd_t *self, float hint)
+{
+	phase_locked_loop_hint(&self->p_locked_loop, hint);
+}
+
 void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
 {
     // Calculate clock based on tempo in
@@ -127,5 +132,5 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
 
     // Test
     uint16_t pll_in = ins->ext_clock < 0.5;
-    outs->phase = phase_locked_loop_process(&self->p_locked_loop, &pll_in);
+    outs->test_out = phase_locked_loop_process(&self->p_locked_loop, &pll_in);
 }
