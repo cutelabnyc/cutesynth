@@ -18,5 +18,11 @@
     },
     "version": "1.0.0",
     "frameworks": "*",
-    "platforms": "*"
+    "platforms": "*",
+    "export": {
+        "include": [
+            "src/*.h",
+            "modules/*.h"
+        ]
+    }
 }
