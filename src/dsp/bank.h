@@ -7,7 +7,6 @@
 #ifndef BANK_H
 #define BANK_H
 
-#include <stdlib.h>
 #include <stdbool.h>
 #include "oscillator.h"
 
@@ -36,13 +35,14 @@ typedef struct bank
  * Initialize the 'bank' struct
  */
 void bank_init(t_bank *self,
+    osc_t *oscillators,
     uint16_t numOsc,
     float sampleRate,
     float fund,
     waveform_t waveform);
 
 /**
- * Frees the 'bank' struct
+ * Cleans up the 'bank' struct
  *
  * TODO: Add and describe parameters
  */

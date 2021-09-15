@@ -1,6 +1,7 @@
 #include "bank.h"
 
 void bank_init(t_bank *self,
+    osc_t *oscillators,
     uint16_t numOsc,
     float sampleRate,
     float fund,
@@ -9,7 +10,7 @@ void bank_init(t_bank *self,
 
     self->_numOsc = numOsc;
 
-    self->osc = (osc_t *)malloc(sizeof(osc_t) * self->_numOsc);
+    self->osc = oscillators;
 
     self->_sampleRate = sampleRate;
     self->_fund = fund;
@@ -25,10 +26,7 @@ void bank_init(t_bank *self,
     }
 }
 
-void bank_destroy(t_bank *self)
-{
-    free(self->osc);
-}
+void bank_destroy(t_bank *self) { }
 
 void bank_setFrequencies(t_bank *self, float *frequencies, float fm, float fmAtten, uint16_t numFreq, bool isLFO)
 {

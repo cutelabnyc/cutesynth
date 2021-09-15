@@ -1,5 +1,5 @@
 #include <unity.h>
-#include <cuteop.h>
+#include <cutesynth.h>
 #include <test_util.h>
 
 t_edge op;

@@ -1,10 +1,5 @@
 #include "oscillator.h"
 
-#include <stdlib.h> // malloc()
-#include <stdio.h>  // printf()
-
-#include <math.h>
-
 // initialization
 void osc_init(osc_t *self, waveform_t waveform)
 {
