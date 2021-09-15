@@ -6,6 +6,7 @@
 void MS_init(messd_t *self)
 {
     phasor_init(&self->p_clock);
+    phase_locked_loop_init(&self->p_locked_loop);
 
     self->beatsPerMeasure = 1;
     self->subdivisionsPerMeasure = 0;
@@ -71,6 +72,11 @@ static void _MS_handleLatch(messd_t *self, messd_ins_t *ins)
     }
 }
 
+static void _MS_handleExternalClock(messd_t *self, double reference)
+{
+
+}
+
 void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
 {
     // Calculate clock based on tempo in
@@ -120,4 +126,7 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
 
     self->lastBeatPhase = beatPhase;
 
+    // Test
+    uint16_t pll_in = ins->ext_clock < 0.5;
+    outs->phase = phase_locked_loop_process(&self->p_locked_loop, pll_in);
 }

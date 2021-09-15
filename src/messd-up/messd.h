@@ -11,6 +11,7 @@
 #define MESSD_H
 
 #include <stdbool.h>
+#include "../op/phase-locked-loop.h"
 #include "../op/phasor.h"
 #include "../op/edge.h"
 
@@ -23,6 +24,7 @@
 typedef struct messd
 {
     phasor_t p_clock;
+    t_phase_locked_loop p_locked_loop;
 
     uint8_t beatsPerMeasure;
     uint8_t subdivisionsPerMeasure;
@@ -41,6 +43,7 @@ typedef struct messd_ins
     double tempo;
     uint8_t beatsPerMeasure;
     uint8_t subdivisionsPerMeasure;
+    double ext_clock;
 
     bool metricModulation;
     bool latchToDownbeat;
