@@ -15,8 +15,8 @@ cmake ..
 ## Testing
 
 ```
-cd build/test
-make
+cd build
+ctest
 ```
 
 After that, all you have to do is `#include <cutesynth.h>` in your project for DSP/API building blocks, and `#include <cutemodules.h>` for full instruments and plugins.
