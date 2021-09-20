@@ -19,7 +19,11 @@ typedef struct phase_locked_loop {
 
 void phase_locked_loop_init(t_phase_locked_loop *self);
 void phase_locked_loop_hint(t_phase_locked_loop *self, float hint);
-float phase_locked_loop_process(t_phase_locked_loop *self, uint16_t *in1);
+
+void phase_locked_loop_set_frequency(t_phase_locked_loop *self, double frequency);
+
+// Set in negative to disable sync
+float phase_locked_loop_process(t_phase_locked_loop *self, int *in1);
 
 #ifdef __cplusplus
 }

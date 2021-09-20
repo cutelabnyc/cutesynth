@@ -23,19 +23,24 @@
   */
 typedef struct messd
 {
-    phasor_t p_clock;
     t_phase_locked_loop p_locked_loop;
 
     uint8_t beatsPerMeasure;
     uint8_t subdivisionsPerMeasure;
-    uint8_t beatKonducta;
-    double lastBeatPhase;
+
+    float lastRootClockPhase;
+    float lastScaledClockPhase;
+    uint8_t beatCounter;
+
+    uint8_t scaledBeatCounter;
 
     bool invertNeedsReset;
     bool modulationNeedsReset;
 
-    double tempoScale;
-    double previousTempoScale;
+    uint16_t tempoMultiply;
+    uint16_t tempoDivide;
+    uint16_t previousTempoMultiply;
+    uint16_t previousTempoDivide;
 } messd_t;
 
 typedef struct messd_ins
@@ -45,6 +50,7 @@ typedef struct messd_ins
     uint8_t subdivisionsPerMeasure;
     double ext_clock;
 
+    bool ext_clock_connected; // true if an external clock is connected
     bool metricModulation;
     bool latchToDownbeat;
     bool invert;
@@ -66,8 +72,8 @@ typedef struct messd_outs
     bool phase;
 
     bool invert;
-    bool modulate;
-	double test_out;
+    bool modulate; // High when modulation trigger is active
+    uint8_t subdivisions; // The number of subdivisions in use, after modulation
 } messd_outs_t;
 
 /**

@@ -25,10 +25,17 @@ void phase_locked_loop_hint(t_phase_locked_loop *self, float hint)
     self->_beta = 0.5 * self->_alpha * self->_alpha;
 }
 
-float phase_locked_loop_process(t_phase_locked_loop *self, uint16_t *in1)
+void phase_locked_loop_set_frequency(t_phase_locked_loop *self, double frequency)
 {
-    // TODO: figure out like timestep and all that bullshit...
+    self->_frequency = frequency;
+}
+
+float phase_locked_loop_process(t_phase_locked_loop *self, int *in1)
+{
     float signal = phasor_step(&self->_phasor, self->_frequency);
+
+    // Skip updating everything if in is negative
+    if (*in1 < 0) return signal;
 
     // Derive binary signals
     char ref = *in1 > 0;
