@@ -11,9 +11,7 @@
 #define MESSD_H
 
 #include <stdbool.h>
-#include "../op/phase-locked-loop.h"
-#include "../op/phasor.h"
-#include "../op/edge.h"
+#include <cutesynth.h>
 
 #define NUM_DIVISION_VALUES 10
 #define MS_PER_MINUTE 60000

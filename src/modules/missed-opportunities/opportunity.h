@@ -10,9 +10,9 @@
 #ifndef OPPORTUNITY_H
 #define OPPORTUNITY_H
 
-#include "./channel.h"
+#include "channel.h"
 #include <stdbool.h>
- // #include "../../src/cutesynth.h"
+#include <cutesynth.h>
 
 #define MIN_AUTO_PPS (11)
 #define MAX_AUTO_PPS (9)
