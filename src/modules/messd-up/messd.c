@@ -128,6 +128,7 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
         phase_locked_loop_set_frequency(&self->p_locked_loop, phaseDelta);
     }
     rootClockPhase = phase_locked_loop_process(&self->p_locked_loop, &pll_in);
+    outs->measuredTempo = self->p_locked_loop._frequency * MS_PER_MINUTE / ins->delta;
 
     // Count beats on the clock
     if (self->lastRootClockPhase > rootClockPhase) {
@@ -186,6 +187,9 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     // Process phased output
     phasor = fmod(scaledClockPhase + ins->phase, 1.0f);
     outs->phase = phasor < ins->pulseWidth;
+
+    // Set tempo out
+    outs->scaledTempo = (outs->measuredTempo * self->tempoMultiply) / self->tempoDivide;
 
     self->lastScaledClockPhase = scaledClockPhase;
 }
