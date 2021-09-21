@@ -50,7 +50,8 @@ typedef struct messd_ins
 
     bool ext_clock_connected; // true if an external clock is connected
     bool metricModulation;
-    bool latchToDownbeat;
+    bool latchChangesToDownbeat;
+    bool latchModulationToDownbeat;
     bool invert;
     bool isRoundTrip;
     bool reset;

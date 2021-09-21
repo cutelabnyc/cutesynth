@@ -42,18 +42,8 @@ static void reduceFraction(uint16_t n_in, uint16_t d_in, uint16_t *n_out, uint16
     }
 }
 
-static void _MS_handleLatch(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
+static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
 {
-    // Update the beats and the subdivisions
-    self->beatsPerMeasure = ins->beatsPerMeasure;
-    self->subdivisionsPerMeasure = ins->subdivisionsPerMeasure;
-
-    if (ins->reset)
-    {
-        self->tempoMultiply = 1;
-        self->tempoDivide = 1;
-    }
-
     // Check for metric modulation
     if (ins->metricModulation && !self->modulationNeedsReset)
     {
@@ -81,6 +71,19 @@ static void _MS_handleLatch(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
             self->tempoDivide = self->previousTempoDivide;
         }
         outs->modulate = true;
+    }
+}
+
+static void _MS_handleLatch(messd_t *self, messd_ins_t *ins)
+{
+    // Update the beats and the subdivisions
+    self->beatsPerMeasure = ins->beatsPerMeasure;
+    self->subdivisionsPerMeasure = ins->subdivisionsPerMeasure;
+
+    if (ins->reset)
+    {
+        self->tempoMultiply = 1;
+        self->tempoDivide = 1;
     }
 
     // Check to apply an invert
@@ -142,12 +145,21 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
 
     outs->beat = scaledClockPhase < ins->pulseWidth;
 
+    // Latch to beat events
     if (self->lastScaledClockPhase > scaledClockPhase)
     {
         self->scaledBeatCounter = (self->scaledBeatCounter + 1) % self->beatsPerMeasure;
-        if (!(ins->latchToDownbeat && self->scaledBeatCounter != 0))
+
+        // Handle changes
+        if (!(ins->latchChangesToDownbeat && self->scaledBeatCounter != 0))
         {
-            _MS_handleLatch(self, ins, outs);
+            _MS_handleLatch(self, ins);
+        }
+
+        // Then handle modulation changes
+        if (!(ins->latchModulationToDownbeat && self->scaledBeatCounter != 0))
+        {
+            _MS_handleModulationLatch(self, ins, outs);
         }
     }
 
