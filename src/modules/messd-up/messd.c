@@ -110,6 +110,8 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     float rootClockPhase = 0;
     float scaledClockPhase = 0;
     double measurePhase = 0;
+    double measurePhaseFloor = 0;
+    double measurePhaseCeiling = 0;
     double subdivision = 0;
     double phasor = 0;
     int pll_in = -1;
@@ -181,8 +183,47 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     outs->downbeat = measurePhase < ins->pulseWidth;
 
     // Calculate subdivisions
-    subdivision = fmod(measurePhase * self->subdivisionsPerMeasure, 1.0f);
-    outs->subdivision = subdivision < ins->pulseWidth;
+    if (ins->truncation > 0) {
+        uint8_t truncatedBeatCount = (self->scaledBeatCounter / ins->truncation) * ins->truncation;
+        float measurePhaseInTrunc = fmodf(scaledClockPhase + self->scaledBeatCounter, ins->truncation) / self->beatsPerMeasure;
+        float measureOffset = ((float) truncatedBeatCount) / self->beatsPerMeasure;
+
+        // Normally the subdivision phase is just the fractional component of the subdivision count.
+        // This changes however if we would overlap with the next truncation, or the end of the measure
+        float subdivisionProgress = measurePhaseInTrunc * self->subdivisionsPerMeasure;
+		float nextSubdivisionProgress = ceil(subdivisionProgress);
+		float subdivisionFrac = 1.0 / self->subdivisionsPerMeasure;
+
+        // Next subdivision would go past the end of the measure
+        if (
+            truncatedBeatCount / ins->truncation == ins->truncation - 1 &&
+            nextSubdivisionProgress / self->subdivisionsPerMeasure + measureOffset > 1.0
+        ) {
+            subdivision = fmodf(subdivisionProgress, 1.0f);
+			subdivision /= (1.0 - (measureOffset + floor(subdivisionProgress) / self->subdivisionsPerMeasure));
+			subdivision *= subdivisionFrac;
+        }
+
+        // Next subdivision would go past the next truncation
+        else if (
+            nextSubdivisionProgress / self->subdivisionsPerMeasure > ((float) ins->truncation) / self->beatsPerMeasure
+        ) {
+            subdivision = fmodf(subdivisionProgress, 1.0f);
+            subdivision /= ((float) ins->truncation) / self->beatsPerMeasure - floor(subdivisionProgress) / self->subdivisionsPerMeasure;
+			subdivision *= subdivisionFrac;
+        }
+
+        // "Normal" situation
+        else {
+            subdivision = fmodf(subdivisionProgress, 1.0f);
+        }
+
+        // In terms of phase
+        outs->subdivision = subdivision < ins->pulseWidth;
+    } else {
+        subdivision = fmod(measurePhase * self->subdivisionsPerMeasure, 1.0f);
+        outs->subdivision = subdivision < ins->pulseWidth;
+    }
 
     // Process phased output
     phasor = fmod(scaledClockPhase + ins->phase, 1.0f);

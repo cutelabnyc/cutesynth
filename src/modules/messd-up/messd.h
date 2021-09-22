@@ -46,6 +46,7 @@ typedef struct messd_ins
     double tempo;
     uint8_t beatsPerMeasure;
     uint8_t subdivisionsPerMeasure;
+    uint8_t truncation;
     double ext_clock;
 
     bool ext_clock_connected; // true if an external clock is connected
