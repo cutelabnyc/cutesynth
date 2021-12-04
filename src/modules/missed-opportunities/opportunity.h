@@ -11,8 +11,8 @@
 #define OPPORTUNITY_H
 
 #include "channel.h"
-#include <stdbool.h>
 #include <cutesynth.h>
+#include <stdbool.h>
 
 #define MIN_AUTO_PPS (11)
 #define MAX_AUTO_PPS (9)
@@ -20,25 +20,24 @@
 #define AUTO_PPS_ROLLOFF_LOW (0.1)
 #define AUTO_PPS_ROLLOFF_HIGH (0.9)
 
- /**
-  * opportunity_t: Module's main data structure
-  *
-  * TODO: Add and describe parameters
-  */
-typedef struct opportunity
-{
-    channel_t *channel;    // Each individual I/O channel
-    uint16_t *probability; // Corresponding probabilities for each I/O channel
+/**
+ * opportunity_t: Module's main data structure
+ *
+ * TODO: Add and describe parameters
+ */
+typedef struct opportunity {
+  channel_t *channel;    // Each individual I/O channel
+  uint16_t *probability; // Corresponding probabilities for each I/O channel
 
-    t_thresh _reset_thresh;
-    t_autopulse _autopulse;
+  t_thresh _reset_thresh;
+  t_autopulse _autopulse;
 
-    uint8_t num_channels;
-    uint16_t v_max;
-    uint16_t v_cutoff;
-    uint8_t hysteresis;
-    uint16_t random_seed;
-    bool reset_high;
+  uint8_t num_channels;
+  uint16_t v_max;
+  uint16_t v_cutoff;
+  uint8_t hysteresis;
+  uint16_t random_seed;
+  bool reset_high;
 
 } opportunity_t;
 
@@ -47,12 +46,8 @@ typedef struct opportunity
  *
  * TODO: Add and describe parameters
  */
-void OP_init(opportunity_t *self,
-    uint8_t num_channels,
-    uint16_t v_max,
-    uint16_t v_cutoff,
-    uint8_t hysteresis,
-    unsigned int random_seed);
+void OP_init(opportunity_t *self, uint8_t num_channels, uint16_t v_max,
+             uint16_t v_cutoff, uint8_t hysteresis, unsigned int random_seed);
 
 /**
  * Frees the 'opportunity' struct
@@ -60,6 +55,13 @@ void OP_init(opportunity_t *self,
  * TODO: Add and describe parameters
  */
 void OP_destroy(opportunity_t *self);
+
+/**
+ * Set a new random seed
+ *
+ * seed - the new random seed
+ */
+void OP_set_seed(opportunity_t *self, unsigned int random_seed);
 
 /**
  * Enable or disable mock randomization. Used for testing.
@@ -74,13 +76,8 @@ void OP_set_mock_random(opportunity_t *self, bool doMock);
  *
  * TODO: Add and describe parameters
  */
-void OP_process(opportunity_t *self,
-    uint16_t *input,
-    uint16_t *output,
-    uint16_t *reset,
-    uint16_t *density,
-    uint16_t *autopulse,
-    uint16_t *missed_opportunities,
-    uint16_t msec);
+void OP_process(opportunity_t *self, uint16_t *input, uint16_t *output,
+                uint16_t *reset, uint16_t *density, uint16_t *autopulse,
+                uint16_t *missed_opportunities, uint16_t msec);
 
 #endif /* OPPORTUNITY_H */
