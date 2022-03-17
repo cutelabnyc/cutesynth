@@ -17,8 +17,8 @@
 #define MIN_AUTO_PPS (11)
 #define MAX_AUTO_PPS (9)
 #define CRAZY_AUTO_PPS (15)
-#define AUTO_PPS_ROLLOFF_LOW (0.1)
-#define AUTO_PPS_ROLLOFF_HIGH (0.9)
+#define AUTO_PPS_ROLLOFF_LOW (0.1f)
+#define AUTO_PPS_ROLLOFF_HIGH (0.9f)
 #define CHANNELS_MAX  (8)
 
 /**
@@ -33,7 +33,7 @@ typedef struct opportunity {
   t_thresh _reset_thresh;
   t_autopulse _autopulse;
 
-  uint8_t num_channels;
+  char num_channels;
   uint16_t v_max;
   uint16_t v_cutoff;
   uint8_t hysteresis;
@@ -77,8 +77,8 @@ void OP_set_mock_random(opportunity_t *self, bool doMock);
  *
  * TODO: Add and describe parameters
  */
-void OP_process(opportunity_t *self, uint16_t *input, uint16_t *output,
-                uint16_t *reset, uint16_t *density, uint16_t *autopulse,
-                uint16_t *missed_opportunities, uint16_t msec);
+void OP_process(opportunity_t *self, uint16_t *input, bool *output,
+                bool reset, uint16_t *density, uint16_t *autopulse,
+                bool *missed_opportunities, char msec);
 
 #endif /* OPPORTUNITY_H */
