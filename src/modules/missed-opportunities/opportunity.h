@@ -19,6 +19,7 @@
 #define CRAZY_AUTO_PPS (15)
 #define AUTO_PPS_ROLLOFF_LOW (0.1)
 #define AUTO_PPS_ROLLOFF_HIGH (0.9)
+#define CHANNELS_MAX  (8)
 
 /**
  * opportunity_t: Module's main data structure
@@ -27,7 +28,7 @@
  */
 typedef struct opportunity {
   channel_t *channel;    // Each individual I/O channel
-  uint16_t *probability; // Corresponding probabilities for each I/O channel
+  uint16_t probability[CHANNELS_MAX]; // Corresponding probabilities for each I/O channel
 
   t_thresh _reset_thresh;
   t_autopulse _autopulse;
@@ -46,7 +47,7 @@ typedef struct opportunity {
  *
  * TODO: Add and describe parameters
  */
-void OP_init(opportunity_t *self, uint8_t num_channels, uint16_t v_max,
+void OP_init(opportunity_t *self, channel_t *channels, uint8_t num_channels, uint16_t v_max,
              uint16_t v_cutoff, uint8_t hysteresis, unsigned int random_seed);
 
 /**

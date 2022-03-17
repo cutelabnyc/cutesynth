@@ -15,11 +15,10 @@ static void _reset_random_sequence(opportunity_t *self, uint16_t random_seed,
   }
 }
 
-void OP_init(opportunity_t *self, uint8_t num_channels, uint16_t v_max,
+void OP_init(opportunity_t *self, channel_t *channels, uint8_t num_channels, uint16_t v_max,
              uint16_t v_cutoff, uint8_t hysteresis, unsigned int random_seed) {
   // Allocates the number of channels
-  self->channel = (channel_t *)malloc(sizeof(channel_t) * num_channels);
-  self->probability = (uint16_t *)malloc(sizeof(uint16_t) * num_channels);
+  self->channel = channels;
 
   // Initialize threshold and edge for reset seed inlet
   thresh_init(&self->_reset_thresh, v_cutoff, hysteresis);
@@ -47,10 +46,7 @@ void OP_init(opportunity_t *self, uint8_t num_channels, uint16_t v_max,
   _reset_random_sequence(self, random_seed, true);
 }
 
-void OP_destroy(opportunity_t *self) {
-  free(self->channel);
-  free(self->probability);
-}
+void OP_destroy(opportunity_t *self) { }
 
 void OP_set_seed(opportunity_t *self, unsigned int random_seed) {
   self->random_seed = random_seed;
