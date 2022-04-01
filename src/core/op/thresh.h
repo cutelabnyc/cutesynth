@@ -8,7 +8,7 @@ extern "C" {
 #endif
 
 typedef struct {
-    uint16_t _lastOutput;
+    char _lastOutput;
     uint16_t _cutoff;
 	uint16_t _hysteresis;
     uint16_t _downThreshold;
@@ -17,7 +17,7 @@ typedef struct {
 
 void thresh_init(t_thresh *self, uint16_t cutoff, uint16_t hysteresis);
 void thresh_set_cutoff(t_thresh *self, uint16_t cutoff);
-void thresh_process(t_thresh *self, uint16_t *in, uint16_t *out);
+void thresh_process(t_thresh *self, uint16_t *in, char *out);
 
 #ifdef __cplusplus
 }

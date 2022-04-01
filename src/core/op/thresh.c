@@ -14,7 +14,7 @@ void thresh_set_cutoff(t_thresh *self, uint16_t cutoff)
     self->_upThreshold = self->_cutoff + self->_hysteresis;
 }
 
-void thresh_process(t_thresh *self, uint16_t *in, uint16_t *out)
+void thresh_process(t_thresh *self, uint16_t *in, char *out)
 {
     // First check if you've got a zero crossing
     uint16_t thisSample = *in;

@@ -216,7 +216,7 @@ void OP_process(opportunity_t *self, uint16_t *input, bool *output,
   // Process density input
   // if (debug)
   //   tu = timer();
-  _OP_process_density(self, density);
+  _OP_process_density(self, *density);
   // if (debug) {
   //   tv = timer();
   //   sprintf(buf, "b: %u\t", tv - tu);

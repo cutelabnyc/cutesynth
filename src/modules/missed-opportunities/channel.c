@@ -33,7 +33,7 @@ void CH_process(channel_t *self,
 {
     uint16_t r1, r2;
     // Threshold the input to +/- 2.5V
-    uint16_t postThresh;
+    char postThresh, t1;
     thresh_process(&self->_input_thresh, in, &postThresh);
 
     // // Convert to 0 -> 1 transition
@@ -44,9 +44,10 @@ void CH_process(channel_t *self,
 
     // // Threshold the random value
     thresh_set_cutoff(&self->_random_thresh, 1023 - *prob);
-    thresh_process(&self->_random_thresh, &r2, &r1);
+    thresh_process(&self->_random_thresh, &r2, &t1);
 
     // // Gate the output accordingly
+    r1 = t1;
     gate_process(&self->_gate, &postThresh, &r1, &r2);
     *out = r2 > 0;
 
