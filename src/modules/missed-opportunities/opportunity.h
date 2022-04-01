@@ -40,6 +40,9 @@ typedef struct opportunity {
   uint16_t random_seed;
   bool reset_high;
 
+  uint16_t autopulseCutoffLow;
+  uint16_t autopulseCutoffHigh;
+
 } opportunity_t;
 
 /**
@@ -80,5 +83,12 @@ void OP_set_mock_random(opportunity_t *self, bool doMock);
 void OP_process(opportunity_t *self, uint16_t *input, bool *output,
                 bool reset, uint16_t *density, uint16_t *autopulse,
                 bool *missed_opportunities, char msec);
+
+/**
+ * Debug version of OP_process with logging
+ */
+void OP_process_debug(opportunity_t *self, uint16_t *input, bool *output,
+                      bool reset, uint16_t *density, uint16_t *autopulse,
+                      bool *missed_opportunities, char msec, unsigned long (*timer)(void), void (*f)(char *));
 
 #endif /* OPPORTUNITY_H */
