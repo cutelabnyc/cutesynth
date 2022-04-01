@@ -1,11 +1,18 @@
 #include "opportunity.h"
 #include <math.h>
 #include <stdlib.h>
+
+#define _DEBUG_ENABLED 0
+#define _OPTIMIZED 1
+
+#if _DEBUG_ENABLED
 #include <stdio.h>
+#endif
 
 #define RESET_RANDOM_SEQUENCE(x) srand(x)
 #define DENSITY_RANGE 1023
 #define DENSITY_THRESHOLD (DENSITY_RANGE * 0.70)
+
 
 static void _reset_random_sequence(opportunity_t *self, uint16_t random_seed,
                                    bool doResetAutopulse) {
@@ -73,6 +80,52 @@ static void _OP_process_reset(opportunity_t *self, bool reset) {
   self->reset_high = reset;
 }
 
+#if _OPTIMIZED
+// Assumes that the maximum value for density is 1023 (2^10 - 1)
+static void _OP_process_density_optimized(opportunity_t *self, uint16_t density)
+{
+  // We want to apply a slight nonlinearity to density here.
+  // This is equivalent to multiplying by ~3 near zero
+  // ...multiplying by 1.414 at 0.25
+  // ...multiplying by 1.18 at 0.5
+  // ...multiplying by 1.07 at 0.75
+  // ...multiplying by 1 at 1 (aka max density)
+  uint16_t scaledProbability;
+  uint16_t interpolationFactor = density & (1 << 8 - 1); // least significant 7 bits
+  if (density <= 255) {
+    // 99 / 70 is a rational approximation of 1.414
+    // This multiplies by 2 rather than 3 near zero, which gives a slightly better fitting curve
+    scaledProbability = density * (interpolationFactor * 99 / 70 + (255 - interpolationFactor) << 1) >> 8;
+  } else if (density <= 511) {
+    // 6 / 5 is a rational approximation of 1.18
+    scaledProbability = density * (interpolationFactor * 6 / 5 + (255 - interpolationFactor) * 99 / 70) >> 8;
+  } else if (density <= 767) {
+    // 27 / 25 is an approximation of 1.07
+    scaledProbability = density * (interpolationFactor * 27 / 25 + (255 - interpolationFactor) * 6 / 5) >> 8;
+  } else {
+    scaledProbability = density * (interpolationFactor + (255 - interpolationFactor) * 27 / 25) >> 8;
+  }
+
+  // Now scaledProbability should be just slightly larger than the original density, applying a nice nonlinearity
+  // Next we need to calculate pulses per second, which depends on scaledProbability as a piecewise linear curve
+  // We can use the same approach here to avoid floating point calculations.
+  uint16_t pulsesPerSecond, interpolationRange;
+  if (scaledProbability < self->autopulseCutoffLow) {
+    // interpolation is very easy here
+    pulsesPerSecond = MIN_AUTO_PPS * scaledProbability / self->autopulseCutoffLow;
+  } else if (scaledProbability < self->autopulseCutoffHigh) {
+    interpolationFactor = scaledProbability - self->autopulseCutoffLow;
+    interpolationRange = self->autopulseCutoffHigh - self->autopulseCutoffLow;
+    pulsesPerSecond = (interpolationFactor * MAX_AUTO_PPS + (interpolationRange - interpolationFactor) * MIN_AUTO_PPS) / interpolationRange;
+  } else {
+    interpolationFactor = scaledProbability - self->autopulseCutoffHigh;
+    interpolationRange = self->v_max - self->autopulseCutoffHigh;
+    pulsesPerSecond = (interpolationFactor * CRAZY_AUTO_PPS + (interpolationRange - interpolationFactor) * MAX_AUTO_PPS) / interpolationRange;
+  }
+  autopulse_set_pulses_per_second(
+    &self->_autopulse, pulsesPerSecond);
+}
+#else
 static void _OP_process_density(opportunity_t *self, uint16_t *density) {
   uint16_t autopulseDensity;
 
@@ -108,53 +161,7 @@ static void _OP_process_density(opportunity_t *self, uint16_t *density) {
   autopulse_set_pulses_per_second(
       &self->_autopulse, scaleFactor * autopulseRange + autopulseOffset);
 }
-
-// Assumes that the maximum value for density is 1023 (2^10 - 1)
-static void _OP_process_density_optimized(opportunity_t *self, uint16_t density)
-{
-  uint16_t autopulseDensity;
-
-  // We want to apply a slight nonlinearity to density here.
-  // This is equivalent to multiplying by ~3 near zero
-  // ...multiplying by 1.414 at 0.25
-  // ...multiplying by 1.18 at 0.5
-  // ...multiplying by 1.07 at 0.75
-  // ...multiplying by 1 at 1 (aka max density)
-  uint16_t scaledProbability;
-  uint16_t interpolationFactor = density & (1 << 8 - 1); // least significant 7 bits
-  if (density <= 255) {
-    // 99 / 70 is a rational approximation of 1.414
-    // This multiplies by 2 rather than 3 near zero, which gives a slightly better fitting curve
-    scaledProbability = density * (interpolationFactor * 99 / 70 + (255 - interpolationFactor) << 1) >> 8;
-  } else if (density <= 511) {
-    // 6 / 5 is a rational approximation of 1.18
-    scaledProbability = density * (interpolationFactor * 6 / 5 + (255 - interpolationFactor) * 99 / 70) >> 8;
-  } else if (density <= 767) {
-    // 27 / 25 is an approximation of 1.07
-    scaledProbability = density * (interpolationFactor * 27 / 25 + (255 - interpolationFactor) * 6 / 5) >> 8;
-  } else {
-    scaledProbability = density * (interpolationFactor + (255 - interpolationFactor) * 27 / 25) >> 8;
-  }
-
-  // Now scaledProbability should be just slightly larger than the original density, applying a nice nonlinearity
-  // Next we need to calculate pulses per second, which depends on scaledProbability as a piecewise linear curve
-  // We can use the same approach here to avoid floating point calculations.
-  uint16_t pulsesPerSecond, interpolationFactor, interpolationRange;
-  if (scaledProbability < self->autopulseCutoffLow) {
-    // interpolation is very easy here
-    pulsesPerSecond = MIN_AUTO_PPS * scaledProbability / self->autopulseCutoffLow;
-  } else if (scaledProbability < self->autopulseCutoffHigh) {
-    interpolationFactor = scaledProbability - self->autopulseCutoffLow;
-    interpolationRange = self->autopulseCutoffHigh - self->autopulseCutoffLow;
-    pulsesPerSecond = (interpolationFactor * MAX_AUTO_PPS + (interpolationRange - interpolationFactor) * MIN_AUTO_PPS) / interpolationRange;
-  } else {
-    interpolationFactor = scaledProbability - self->autopulseCutoffHigh;
-    interpolationRange = self->v_max - self->autopulseCutoffHigh;
-    pulsesPerSecond = (interpolationFactor * CRAZY_AUTO_PPS + (interpolationRange - interpolationFactor) * MAX_AUTO_PPS) / interpolationRange;
-  }
-  autopulse_set_pulses_per_second(
-    &self->_autopulse, pulsesPerSecond);
-}
+#endif
 
 static void _OP_process_CV(opportunity_t *self, uint16_t *input,
                            bool *output, bool *missed_opportunities) {
@@ -187,7 +194,7 @@ static void OP_process_helper(opportunity_t *self, uint16_t *input, bool *output
   // Process density input
   if (debug)
     tu = timer();
-  _OP_process_density(self, density);
+  _OP_process_density_optimized(self, density);
   if (debug) {
     tv = timer();
     sprintf(buf, "b: %u\t", tv - tu);
@@ -197,7 +204,7 @@ static void OP_process_helper(opportunity_t *self, uint16_t *input, bool *output
   // Process the automatic pulsing
   if (debug)
     tu = timer();
-  autopulse_process(&self->_autopulse, msec, autopulse);
+  autopulse_process_fast(&self->_autopulse, msec, autopulse);
   if (debug) {
     tv = timer();
     sprintf(buf, "c: %u\t", tv - tu);
@@ -228,5 +235,9 @@ void OP_process_debug(opportunity_t *self, uint16_t *input, bool *output,
                       bool reset, uint16_t *density, uint16_t *autopulse,
                       bool *missed_opportunities, char msec, unsigned long (*timer)(void), void (*f)(char *))
 {
+#if _DEBUG_ENABLED
   OP_process_helper(self, input, output, reset, density, autopulse, missed_opportunities, msec, timer, f, true);
+#else 
+  OP_process_helper(self, input, output, reset, density, autopulse, missed_opportunities, msec, timer, f, false);
+#endif
 }
