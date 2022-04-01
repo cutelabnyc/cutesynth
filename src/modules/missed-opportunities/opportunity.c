@@ -2,9 +2,6 @@
 #include <math.h>
 #include <stdlib.h>
 
-#define _DEBUG_ENABLED 0
-#define _OPTIMIZED 1
-
 #if _DEBUG_ENABLED
 #include <stdio.h>
 #endif
@@ -82,7 +79,7 @@ static void _OP_process_reset(opportunity_t *self, bool reset) {
 
 #if _OPTIMIZED
 // Assumes that the maximum value for density is 1023 (2^10 - 1)
-static void _OP_process_density_optimized(opportunity_t *self, uint16_t density)
+static void _OP_process_density(opportunity_t *self, uint16_t density)
 {
   // We want to apply a slight nonlinearity to density here.
   // This is equivalent to multiplying by ~3 near zero
@@ -90,8 +87,11 @@ static void _OP_process_density_optimized(opportunity_t *self, uint16_t density)
   // ...multiplying by 1.18 at 0.5
   // ...multiplying by 1.07 at 0.75
   // ...multiplying by 1 at 1 (aka max density)
+
   uint16_t scaledProbability;
   uint16_t interpolationFactor = density & (1 << 8 - 1); // least significant 7 bits
+
+  #if 0
   if (density <= 255) {
     // 99 / 70 is a rational approximation of 1.414
     // This multiplies by 2 rather than 3 near zero, which gives a slightly better fitting curve
@@ -104,6 +104,28 @@ static void _OP_process_density_optimized(opportunity_t *self, uint16_t density)
     scaledProbability = density * (interpolationFactor * 27 / 25 + (255 - interpolationFactor) * 6 / 5) >> 8;
   } else {
     scaledProbability = density * (interpolationFactor + (255 - interpolationFactor) * 27 / 25) >> 8;
+  }
+  #endif
+
+  // Less optimized but also maybe it actually works?
+  if (density <= 50) {
+    scaledProbability = density * 3;
+  } else if (density <= 128) {
+    scaledProbability = density * 2;
+  } else if (density <= 255) {
+    scaledProbability = ((float)density * 1.414);
+  } else if (density <= 511) {
+    scaledProbability = ((float)density * 1.18);
+  } else if (density <= 767) {
+    scaledProbability = ((float)density * 1.07);
+  } else {
+    scaledProbability = density;
+  }
+
+  for (char i = 0; i < self->num_channels; i++) {
+    if (self->channel[i]._edge._last != 1) {
+      self->probability[i] = scaledProbability;
+    }
   }
 
   // Now scaledProbability should be just slightly larger than the original density, applying a nice nonlinearity
@@ -173,71 +195,53 @@ static void _OP_process_CV(opportunity_t *self, uint16_t *input,
   }
 }
 
-static void OP_process_helper(opportunity_t *self, uint16_t *input, bool *output,
+void OP_process(opportunity_t *self, uint16_t *input, bool *output,
                       bool reset, uint16_t *density, uint16_t *autopulse,
-                      bool *missed_opportunities, char msec, unsigned long (*timer)(void), void (*f)(char *), bool debug)
+                      bool *missed_opportunities, char msec)
 {
-  uint16_t tu, tv;
-  char buf[32];
+  // uint16_t tu, tv;
+  // char buf[32];
 
 
   // Process reset input
-  if (debug)
-    tu = timer();
+  // if (debug)
+  //   tu = timer();
   _OP_process_reset(self, reset);
-  if (debug) {
-    tv = timer();
-    sprintf(buf, "a: %u\t", tv - tu);
-    f(buf);
-  }
+  // if (debug) {
+  //   tv = timer();
+  //   sprintf(buf, "a: %u\t", tv - tu);
+  //   f(buf);
+  // }
 
   // Process density input
-  if (debug)
-    tu = timer();
-  _OP_process_density_optimized(self, density);
-  if (debug) {
-    tv = timer();
-    sprintf(buf, "b: %u\t", tv - tu);
-    f(buf);
-  }
+  // if (debug)
+  //   tu = timer();
+  _OP_process_density(self, density);
+  // if (debug) {
+  //   tv = timer();
+  //   sprintf(buf, "b: %u\t", tv - tu);
+  //   f(buf);
+  // }
 
   // Process the automatic pulsing
-  if (debug)
-    tu = timer();
-  autopulse_process_fast(&self->_autopulse, msec, autopulse);
-  if (debug) {
-    tv = timer();
-    sprintf(buf, "c: %u\t", tv - tu);
-    f(buf);
-  }
+  // if (debug)
+  //   tu = timer();
+  autopulse_process(&self->_autopulse, msec, autopulse);
+  // if (debug) {
+  //   tv = timer();
+  //   sprintf(buf, "c: %u\t", tv - tu);
+  //   f(buf);
+  // }
 
   *autopulse = (*autopulse > 0) ? self->v_max : 0;
 
   // Process CV inputs
-  if (debug)
-    tu = timer();
+  // if (debug)
+  //   tu = timer();
   _OP_process_CV(self, input, output, missed_opportunities);
-  if (debug) {
-    tv = timer();
-    sprintf(buf, "d: %u\n", tv - tu);
-    f(buf);
-  }
-}
-
-void OP_process(opportunity_t *self, uint16_t *input, bool *output,
-                bool reset, uint16_t *density, uint16_t *autopulse,
-                bool *missed_opportunities, char msec)
-{
-  OP_process_helper(self, input, output, reset, density, autopulse, missed_opportunities, msec, NULL, NULL, false);
-}
-
-void OP_process_debug(opportunity_t *self, uint16_t *input, bool *output,
-                      bool reset, uint16_t *density, uint16_t *autopulse,
-                      bool *missed_opportunities, char msec, unsigned long (*timer)(void), void (*f)(char *))
-{
-#if _DEBUG_ENABLED
-  OP_process_helper(self, input, output, reset, density, autopulse, missed_opportunities, msec, timer, f, true);
-#else 
-  OP_process_helper(self, input, output, reset, density, autopulse, missed_opportunities, msec, timer, f, false);
-#endif
+  // if (debug) {
+  //   tv = timer();
+  //   sprintf(buf, "d: %u\n", tv - tu);
+  //   f(buf);
+  // }
 }

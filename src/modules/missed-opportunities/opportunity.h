@@ -14,6 +14,9 @@
 #include <cutesynth.h>
 #include <stdbool.h>
 
+#define _DEBUG_ENABLED 0
+#define _OPTIMIZED 1
+
 #define MIN_AUTO_PPS (11)
 #define MAX_AUTO_PPS (9)
 #define CRAZY_AUTO_PPS (15)
@@ -87,8 +90,10 @@ void OP_process(opportunity_t *self, uint16_t *input, bool *output,
 /**
  * Debug version of OP_process with logging
  */
+#if _DEBUG_ENABLED
 void OP_process_debug(opportunity_t *self, uint16_t *input, bool *output,
                       bool reset, uint16_t *density, uint16_t *autopulse,
                       bool *missed_opportunities, char msec, unsigned long (*timer)(void), void (*f)(char *));
+#endif // _DEBUG
 
 #endif /* OPPORTUNITY_H */

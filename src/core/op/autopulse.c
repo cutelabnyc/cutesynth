@@ -31,7 +31,7 @@ void autopulse_set_minimum_interval(t_autopulse *self, uint16_t msec_int)
 	self->_limit = msec_int;
 }
 
-static void autopulse_process_helper(t_autopulse *self, uint16_t msec_elapsed, uint16_t *out, bool fast)
+void autopulse_process(t_autopulse *self, uint16_t msec_elapsed, uint16_t *out)
 {
 	static float randomMaxFloat = (float) CUTE_RANDOM_MAX;
 	uint16_t rin = 1;
@@ -40,14 +40,13 @@ static void autopulse_process_helper(t_autopulse *self, uint16_t msec_elapsed, u
 	bool canFlip = self->_elapsed > self->_limit;
 	float probability;
 
-	if (!fast) {
-		float exponent = ((float) msec_elapsed * self->_fpmsec);
-		probability = 1.0 - 1.0 / powf(2.0, exponent);
-	} else {
-		// Very approximate with sharp break points, but also probably fine.
+	float exponent = ((float) msec_elapsed * self->_fpmsec);
+	probability = 1.0 - 1.0 / powf(2.0, exponent);
+	#if 0
+		// Broken and doesn't work
 		uint16_t exponent = msec_elapsed * self->_fpmsec;
 		probability = 1.0 - 1.0 / ((float) (1 << exponent));
-	}
+	#endif
 
 	random_process(&self->_random, &rin, &rout);
 	float factor = (float) rout / randomMaxFloat;
@@ -59,17 +58,4 @@ static void autopulse_process_helper(t_autopulse *self, uint16_t msec_elapsed, u
 	}
 
 	*out = self->_state ? 1 : 0;
-}
-
-/**
- * Fetch the next sample, provided the amount of time that has elapsed since the last process.
- */
-void autopulse_process(t_autopulse *self, uint16_t msec_elapsed, uint16_t *out)
-{
-	autopulse_process_helper(self, msec_elapsed, out, false);
-}
-
-void autopulse_process_fast(t_autopulse *self, uint16_t msec_elapsed, uint16_t *out)
-{
-	autopulse_process_helper(self, msec_elapsed, out, true);
 }
