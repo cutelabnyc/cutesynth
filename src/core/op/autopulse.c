@@ -31,8 +31,26 @@ void autopulse_set_minimum_interval(t_autopulse *self, uint16_t msec_int)
 	self->_limit = msec_int;
 }
 
+static float fpow2(const float y)
+{
+  union
+  {
+    float f;
+    int32_t i;
+  } c;
+
+  int32_t integer = (int32_t)y;
+  if(y < 0) integer = integer-1;
+  float frac = y - (float)integer;
+  c.i = (integer+((int32_t)127)) << 23;
+  // Serial.println(c.i);
+  c.f *= 0.33977f*frac*frac + (1.0f-0.33977f)*frac + 1.0f;
+  return c.f;
+}
+
 void autopulse_process(t_autopulse *self, uint16_t msec_elapsed, uint16_t *out)
 {
+	
 	static float randomMaxFloat = (float) CUTE_RANDOM_MAX;
 	uint16_t rin = 1;
 	uint16_t rout;
@@ -41,7 +59,13 @@ void autopulse_process(t_autopulse *self, uint16_t msec_elapsed, uint16_t *out)
 	float probability;
 
 	float exponent = ((float) msec_elapsed * self->_fpmsec);
+
+	#if 1
+	probability = 1.0 - 1.0 / fpow2(exponent);
+	#else
 	probability = 1.0 - 1.0 / powf(2.0, exponent);
+	#endif
+	
 	#if 0
 		// Broken and doesn't work
 		uint16_t exponent = msec_elapsed * self->_fpmsec;
