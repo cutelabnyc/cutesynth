@@ -39,8 +39,10 @@ void OP_init(opportunity_t *self, channel_t *channels, uint8_t num_channels, uin
   self->reset_high = false;
 
   // Store these values as an optimization
+  #if _OPTIMIZED
   self->autopulseCutoffLow = (uint16_t) (AUTO_PPS_ROLLOFF_LOW * self->v_max);
   self->autopulseCutoffHigh = (uint16_t) (AUTO_PPS_ROLLOFF_HIGH * self->v_max);
+  #endif
 
   // Initialize each channel
   for (char i = 0; i < num_channels; i++) {
@@ -148,10 +150,10 @@ static void _OP_process_density(opportunity_t *self, uint16_t density)
     &self->_autopulse, pulsesPerSecond);
 }
 #else
-static void _OP_process_density(opportunity_t *self, uint16_t *density) {
+static void _OP_process_density(opportunity_t *self, uint16_t density) {
   uint16_t autopulseDensity;
 
-  float base_probability = ((float)*density) / (float)DENSITY_RANGE;
+  float base_probability = ((float)density) / (float)DENSITY_RANGE;
   uint16_t scaled_probability = powf(base_probability, 0.75f) * DENSITY_RANGE;
 
   for (char i = 0; i < self->num_channels; i++) {
@@ -160,7 +162,7 @@ static void _OP_process_density(opportunity_t *self, uint16_t *density) {
     }
   }
 
-  autopulseDensity = *density;
+  autopulseDensity = density;
 
   float scaleFactor = (float)autopulseDensity / (float)self->v_max;
   float autopulseRange;

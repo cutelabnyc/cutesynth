@@ -43,8 +43,10 @@ typedef struct opportunity {
   uint16_t random_seed;
   bool reset_high;
 
+#if _OPTIMIZED
   uint16_t autopulseCutoffLow;
   uint16_t autopulseCutoffHigh;
+#endif
 
 } opportunity_t;
 
