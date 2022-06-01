@@ -31,31 +31,37 @@ void CH_process(channel_t *self,
     bool *out,
     bool *missed_opportunities)
 {
-    uint16_t r1, r2;
+
+    uint16_t r1, r2, r3;
     // Threshold the input to +/- 2.5V
     char postThresh, t1;
     thresh_process(&self->_input_thresh, in, &postThresh);
 
     // // Convert to 0 -> 1 transition
-    edge_process(&self->_edge, &postThresh, &r1);
+    r2 = postThresh > 0 ? 1: 0;
+    edge_process(&self->_edge, &r2, &r1);
 
     // // Generate a new random number on an edge
     random_process(&self->_random, &r1, &r2);
 
     // // Threshold the random value
-    thresh_set_cutoff(&self->_random_thresh, 1023 - *prob);
+    int cutoff = 1023 - *prob;
+    cutoff = cutoff > 1023 ? 1023 : (cutoff < 0 ? 0 : cutoff);
+    thresh_set_cutoff(&self->_random_thresh, cutoff);
     thresh_process(&self->_random_thresh, &r2, &t1);
+
 
     // // Gate the output accordingly
     r1 = t1;
-    gate_process(&self->_gate, &postThresh, &r1, &r2);
+    r3 = postThresh;
+    gate_process(&self->_gate, &r3, &r1, &r2);
     *out = r2 > 0;
 
     // // Gate the Missed Opportunities
     if (missed_opportunities != NULL)
     {
         r2 = !(r1);
-        gate_process(&self->_gate, &postThresh, &r2, &r1);
+        gate_process(&self->_gate, &r3, &r2, &r1);
         *missed_opportunities = r1 > 0;
     }
 }
