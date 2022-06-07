@@ -10,6 +10,9 @@ void MS_init(messd_t *self)
     self->subdivisionsPerMeasure = 0;
     self->lastRootClockPhase = 1;
     self->lastScaledClockPhase = 1;
+    self->lastModulationSwitch = false;
+    self->lastModulationSignal = false;
+    self->inRoundTripModulation = false;
 
     self->beatCounter = 0;
     self->scaledBeatCounter = 0;
@@ -19,7 +22,7 @@ void MS_init(messd_t *self)
     self->previousTempoDivide = 1;
 
     self->invertNeedsReset = false;
-    self->modulationNeedsReset = false;
+    self->modulationPending = false;
 }
 
 void MS_destroy(messd_t *self)
@@ -42,35 +45,82 @@ static void reduceFraction(uint16_t n_in, uint16_t d_in, uint16_t *n_out, uint16
     }
 }
 
+static void _MS_handleModulation(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
+{
+    // Leading edge on modulation signal
+    if (!self->lastModulationSignal && ins->modulationSignal) {
+        // Usually this will cause a pending modulation, except in the unique case where
+        // we're jumping back up to "modulation high" when we're in round trip mode
+        // and already modulated
+
+        if (self->inRoundTripModulation && self->modulationPending) {
+            self->modulationPending = false; // cancel the modulation
+        } else {
+            self->modulationPending = true;
+        }
+    }
+
+    // Lagging edge on modulation signal
+    if (self->lastModulationSignal && !ins->modulationSignal) {
+        // Does nothing unless we're in round trip mode. In RT mode,
+        // this triggers a modulation if we're in a round trip modulation.
+        // If not, it cancels the pending modulation
+        if (ins->isRoundTrip) {
+            if (self->inRoundTripModulation) {
+                self->modulationPending = true;
+            } else if (self->modulationPending) {
+                self->modulationPending = false;
+            }
+        }
+    }
+
+    // Leading edge on modulate button
+    if (!self->lastModulationSwitch && ins->modulationSwitch) {
+        self->modulationPending = !self->modulationPending;
+    }
+
+    self->lastModulationSignal = ins->modulationSignal;
+    self->lastModulationSwitch = ins->modulationSwitch;
+}
+
 static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
 {
-    // Check for metric modulation
-    if (ins->metricModulation && !self->modulationNeedsReset)
+    if (self->modulationPending)
     {
-        if (ins->isRoundTrip)
-        {
-            self->previousTempoMultiply = self->tempoMultiply;
-            self->previousTempoDivide = self->tempoDivide;
-        }
+        if (!self->inRoundTripModulation) {
+            if (ins->isRoundTrip)
+            {
+                self->previousTempoMultiply = self->tempoMultiply;
+                self->previousTempoDivide = self->tempoDivide;
+                self->inRoundTripModulation = true;
+            } else {
+                self->inRoundTripModulation = false;
+            }
 
-        self->tempoMultiply *= ins->subdivisionsPerMeasure;
-        self->tempoDivide *= ins->beatsPerMeasure;
-        reduceFraction(self->tempoMultiply, self->tempoDivide, &self->tempoMultiply, &self->tempoDivide);
-        self->modulationNeedsReset = true;
-        self->subdivisionsPerMeasure = self->beatsPerMeasure;
+            self->tempoMultiply *= ins->subdivisionsPerMeasure;
+            self->tempoDivide *= ins->beatsPerMeasure;
+            reduceFraction(self->tempoMultiply, self->tempoDivide, &self->tempoMultiply, &self->tempoDivide);
+            self->modulationPending = true;
+            self->subdivisionsPerMeasure = self->beatsPerMeasure;
 
-        // Set subdivisions equal to beats upon metric modulation
-        ins->subdivisionsPerMeasure = self->beatsPerMeasure;
-        outs->modulate = true;
-    }
-    else if (ins->isRoundTrip) {
-        // Check for roundtrip mode and modulate
-        if (!ins->metricModulation)
-        {
+            // Set subdivisions equal to beats upon metric modulation
+            ins->subdivisionsPerMeasure = self->beatsPerMeasure;
+            outs->eom = true;
+        } else {
             self->tempoMultiply = self->previousTempoMultiply;
             self->tempoDivide = self->previousTempoDivide;
+            outs->eom = true;
+            self->inRoundTripModulation = false;
         }
-        outs->modulate = true;
+    }
+
+    // Special case--force us to leave a round trip modulation if we're no longer in round trip
+    // mode, but we're in a round trip modoulation
+    if (self->inRoundTripModulation && !ins->isRoundTrip) {
+        self->tempoMultiply = self->previousTempoMultiply;
+        self->tempoDivide = self->previousTempoDivide;
+        outs->eom = true;
+        self->inRoundTripModulation = false;
     }
 }
 
@@ -116,8 +166,6 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     double phasor = 0;
     int pll_in = -1;
 
-    outs->modulate = false;
-
     // ==== Root clock calculations
 
     // Calculate clock based on tempo in
@@ -148,6 +196,8 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
 
     outs->beat = scaledClockPhase < ins->pulseWidth;
 
+    // Potentially enter a "modulation pending" state
+
     // Latch to beat events
     if (self->lastScaledClockPhase > scaledClockPhase)
     {
@@ -164,12 +214,6 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
         {
             _MS_handleModulationLatch(self, ins, outs);
         }
-    }
-
-    // Reset metric modulation
-    if (!ins->metricModulation)
-    {
-        self->modulationNeedsReset = false;
     }
 
     if (!ins->invert)
@@ -234,6 +278,10 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
 
     // Set tempo out
     outs->scaledTempo = (outs->measuredTempo * self->tempoMultiply) / self->tempoDivide;
+
+    // Set modulate pending output
+    // Note the special case here
+    outs->modulationPending = self->modulationPending || (!ins->isRoundTrip && self->inRoundTripModulation);
 
     self->lastScaledClockPhase = scaledClockPhase;
 }

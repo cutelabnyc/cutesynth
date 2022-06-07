@@ -32,8 +32,11 @@ typedef struct messd
 
     uint8_t scaledBeatCounter;
 
+    bool lastModulationSignal;
+    bool lastModulationSwitch;
+    bool inRoundTripModulation;
     bool invertNeedsReset;
-    bool modulationNeedsReset;
+    bool modulationPending;
 
     uint16_t tempoMultiply;
     uint16_t tempoDivide;
@@ -50,7 +53,8 @@ typedef struct messd_ins
     double ext_clock;
 
     bool ext_clock_connected; // true if an external clock is connected
-    bool metricModulation;
+    bool modulationSignal; // continuous modulation signal
+    bool modulationSwitch; // modulation pushbutton
     bool latchChangesToDownbeat;
     bool latchModulationToDownbeat;
     bool invert;
@@ -70,9 +74,10 @@ typedef struct messd_outs
     bool subdivision;
     bool phase;
     bool truncate;
+    bool eom;
 
     bool invert;
-    bool modulate; // High when modulation trigger is active
+    bool modulationPending; // High when modulation trigger is active
     uint8_t subdivisions; // The number of subdivisions in use, after modulation
 	double scaledTempo; // Output tempo after scaling
     double measuredTempo; // Measured tempo of the external clock
