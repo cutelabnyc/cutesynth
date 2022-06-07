@@ -100,7 +100,6 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
             self->tempoMultiply *= ins->subdivisionsPerMeasure;
             self->tempoDivide *= ins->beatsPerMeasure;
             reduceFraction(self->tempoMultiply, self->tempoDivide, &self->tempoMultiply, &self->tempoDivide);
-            self->modulationPending = true;
             self->subdivisionsPerMeasure = self->beatsPerMeasure;
 
             // Set subdivisions equal to beats upon metric modulation
@@ -122,6 +121,8 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
         outs->eom = true;
         self->inRoundTripModulation = false;
     }
+
+    self->modulationPending = false;
 }
 
 static void _MS_handleLatch(messd_t *self, messd_ins_t *ins)
