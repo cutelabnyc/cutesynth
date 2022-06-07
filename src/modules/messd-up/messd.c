@@ -45,7 +45,7 @@ static void reduceFraction(uint16_t n_in, uint16_t d_in, uint16_t *n_out, uint16
     }
 }
 
-static void _MS_handleModulation(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
+static void _MS_handleModulation(messd_t *self, messd_ins_t *ins)
 {
     // Leading edge on modulation signal
     if (!self->lastModulationSignal && ins->modulationSignal) {
@@ -197,6 +197,7 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     outs->beat = scaledClockPhase < ins->pulseWidth;
 
     // Potentially enter a "modulation pending" state
+    _MS_handleModulation(self, ins);
 
     // Latch to beat events
     if (self->lastScaledClockPhase > scaledClockPhase)
