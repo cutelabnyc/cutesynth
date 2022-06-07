@@ -57,7 +57,6 @@ typedef struct messd_ins
     bool isRoundTrip;
     bool reset;
 
-    uint8_t wrap;
     double phase;
     double pulseWidth;
 
@@ -70,6 +69,7 @@ typedef struct messd_outs
     bool beat;
     bool subdivision;
     bool phase;
+    bool truncate;
 
     bool invert;
     bool modulate; // High when modulation trigger is active

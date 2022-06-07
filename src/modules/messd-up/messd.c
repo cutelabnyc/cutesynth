@@ -183,6 +183,10 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     outs->downbeat = measurePhase < ins->pulseWidth;
 
     // Calculate subdivisions
+    subdivision = fmod(measurePhase * self->subdivisionsPerMeasure, 1.0f);
+    outs->subdivision = subdivision < ins->pulseWidth;
+
+    // Calculate truncation
     if (ins->truncation > 0) {
         uint8_t truncatedBeatCount = (self->scaledBeatCounter / ins->truncation) * ins->truncation;
         float measurePhaseInTrunc = fmodf(scaledClockPhase + self->scaledBeatCounter, ins->truncation) / self->beatsPerMeasure;
@@ -219,10 +223,9 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
         }
 
         // In terms of phase
-        outs->subdivision = subdivision < ins->pulseWidth;
+        outs->truncate = subdivision < ins->pulseWidth;
     } else {
-        subdivision = fmod(measurePhase * self->subdivisionsPerMeasure, 1.0f);
-        outs->subdivision = subdivision < ins->pulseWidth;
+        outs->truncate = outs->subdivision;
     }
 
     // Process phased output
