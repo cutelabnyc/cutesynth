@@ -166,6 +166,7 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     double subdivision = 0;
     double phasor = 0;
     int pll_in = -1;
+    outs->eom = false;
 
     // ==== Root clock calculations
 
