@@ -99,6 +99,16 @@ void MS_destroy(messd_t *self);
 void MS_clock_wavelength_hint(messd_t *self, float hint);
 
 /**
+ * Set the numerator (multiplier) of the output clock frequency
+ */
+void MS_set_output_multiplier(messd_t *self, int multiplier);
+
+/**
+ * Set the dividend (divisor) of the output clock frequency
+ */
+void MS_set_output_divisor(messd_t *self, int divisor);
+
+/**
  * Processes the incoming CV data in main.cpp
  */
 void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs);
