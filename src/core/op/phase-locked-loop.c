@@ -34,6 +34,16 @@ void phase_locked_loop_set_frequency(t_phase_locked_loop *self, double frequency
     self->_frequency = frequency;
 }
 
+void phase_locked_loop_set_numerator(t_phase_locked_loop *self, int numerator)
+{
+    self->_feedbackDivisor = numerator;
+}
+
+void phase_locked_loop_set_denominator(t_phase_locked_loop *self, int denominator)
+{
+    self->_referenceDivisor = denominator;
+}
+
 float phase_locked_loop_process(t_phase_locked_loop *self, int *in1)
 {
     float signal = phasor_step(&self->_phasor, self->_frequency);
