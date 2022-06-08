@@ -4,7 +4,7 @@ void pdivide_init(t_pdivide *self)
     self->lastPulse = false;
 }
 
-float pdivide_process(t_pdivide *self, bool signal, int divisor)
+float pdivide_process(t_pdivide *self, char signal, int divisor)
 {
     // Leading or lagging edge, so that we can work with odd divisors
     if ((!signal && self->lastPulse) || (signal && !self->lastPulse)) {

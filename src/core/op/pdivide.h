@@ -8,18 +8,18 @@ extern "C"
     /**
      * t_pdivide: Frequency divider for a pulse train
      *
-     * bool - pulse signal to divide
+     * char - pulse signal to divide
      * int - divisor (must be 1 or greater)
      */
 
     typedef struct
     {
-        bool lastPulse;
+        char lastPulse;
         int count;
     } t_pdivide;
 
     void pdivide_init(t_pdivide *self);
-    float pdivide_process(t_pdivide *self, bool signal, int divisor);
+    float pdivide_process(t_pdivide *self, char signal, int divisor);
 
 #ifdef __cplusplus
 }
