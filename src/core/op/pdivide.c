@@ -1,3 +1,5 @@
+#include "pdivide.h"
+
 void pdivide_init(t_pdivide *self)
 {
     self->count = 0;
