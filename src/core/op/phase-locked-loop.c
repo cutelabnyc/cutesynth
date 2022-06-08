@@ -5,6 +5,8 @@
 void phase_locked_loop_init(t_phase_locked_loop *self)
 {
     phasor_init(&self->_phasor);
+    fdivide_init(&self->_feedbackDivider);
+    pdivide_init(&self->_referenceDivider);
 
 	self->_derivative = 0.0000000000953125;
     self->_alpha = 0.00002053125;
@@ -16,6 +18,8 @@ void phase_locked_loop_init(t_phase_locked_loop *self)
     self->_lastReference = 0;
     self->_lastSignal = 0;
     self->_lastErrorSignal = 0;
+    self->_feedbackDivisor = 1;
+    self->_referenceDivisor = 1;
 }
 
 void phase_locked_loop_hint(t_phase_locked_loop *self, float hint)
@@ -38,19 +42,14 @@ float phase_locked_loop_process(t_phase_locked_loop *self, int *in1)
     if (*in1 < 0) return signal;
 
     // Derive binary signals
-    char ref = *in1 > 0;
-    char sig = signal < 0.5;
+    char ref = pdivide_process(&self->_referenceDivider, (*in1 > 0), self->_referenceDivisor);
+    char sig = fdivide_process(&self->_feedbackDivider, signal, self->_feedbackDivisor) < 0.5;
 
-    char reset = !(self->_qref && self->_qsig);
-    self->_qsig = (self->_qsig || (sig && !self->_lastSignal)) && reset; // Trigger signal flip-flop and leading edge of signal
-    self->_qref = (self->_qref || (ref && !self->_lastReference)) && reset; // Trigger reference flip-flop on leading edge of reference
+    char reset = self->_qref && self->_qsig;
+    self->_qsig = (self->_qsig || (sig && !self->_lastSignal)) && !reset; // Trigger signal flip-flop and leading edge of signal
+    self->_qref = (self->_qref || (ref && !self->_lastReference)) && !reset; // Trigger reference flip-flop on leading edge of reference
 
 	int errorSignal = self->_qsig - self->_qref;
-	if (errorSignal != 0) {
-		signal = signal;
-	} else {
-		signal = signal;
-	}
     self->_lastReference = ref;
     self->_lastSignal = sig;
     float filtered_ersig = errorSignal + (errorSignal - self->_lastErrorSignal) * self->_derivative;
