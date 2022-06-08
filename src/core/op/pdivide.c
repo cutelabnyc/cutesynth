@@ -3,7 +3,7 @@
 void pdivide_init(t_pdivide *self)
 {
     self->count = 0;
-    self->lastPulse = false;
+    self->lastPulse = 0;
 }
 
 float pdivide_process(t_pdivide *self, char signal, int divisor)
