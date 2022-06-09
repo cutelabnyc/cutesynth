@@ -199,7 +199,7 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     outs->measuredTempo = MS_PER_MINUTE / self->measuredPeriod;
 
     // Count beats on the clock
-    if (self->lastRootClockPhase > rootClockPhase) {
+    if (self->lastRootClockPhase - rootClockPhase > 0.5) {
         self->beatCounter = (self->beatCounter + 1) % self->tempoDivide;
     }
     self->lastRootClockPhase = rootClockPhase;
@@ -218,7 +218,7 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     _MS_handleModulation(self, ins);
 
     // Latch to beat events
-    if (self->lastScaledClockPhase > scaledClockPhase)
+    if (self->lastScaledClockPhase - scaledClockPhase > 0.5)
     {
         self->scaledBeatCounter = (self->scaledBeatCounter + 1) % self->beatsPerMeasure;
 
