@@ -285,6 +285,7 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     // Set modulate pending output
     // Note the special case here
     outs->modulationPending = self->modulationPending || (!ins->isRoundTrip && self->inRoundTripModulation);
+    outs->inRoundTripModulation = self->inRoundTripModulation;
 
     self->lastScaledClockPhase = scaledClockPhase;
 }

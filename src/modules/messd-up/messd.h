@@ -80,6 +80,7 @@ typedef struct messd_outs
 
     bool invert;
     bool modulationPending; // High when modulation trigger is active
+    bool inRoundTripModulation; // High when a round trip modulation is active
     uint8_t subdivisions; // The number of subdivisions in use, after modulation
 	double scaledTempo; // Output tempo after scaling
     double measuredTempo; // Measured tempo of the external clock
