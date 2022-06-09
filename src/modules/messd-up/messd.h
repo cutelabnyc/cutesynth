@@ -52,7 +52,7 @@ typedef struct messd_ins
     double tempo;
     uint8_t beatsPerMeasure;
     uint8_t subdivisionsPerMeasure;
-    uint8_t truncation;
+    float truncation; // normalized to the number of beats
     double ext_clock;
 
     bool modulationSignal; // continuous modulation signal

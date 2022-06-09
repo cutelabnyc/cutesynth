@@ -250,9 +250,12 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     outs->subdivision = subdivision < ins->pulseWidth;
 
     // Calculate truncation
-    if (ins->truncation > 0) {
-        uint8_t truncatedBeatCount = (self->scaledBeatCounter / ins->truncation) * ins->truncation;
-        float measurePhaseInTrunc = fmodf(scaledClockPhase + self->scaledBeatCounter, ins->truncation) / self->beatsPerMeasure;
+    if (ins->truncation > 0.0f) {
+        float wrapfraction = ins->truncation * self->beatsPerMeasure;
+        wrapfraction = floorf(wrapfraction) + 1;
+        int truncation = (int) wrapfraction;
+        uint8_t truncatedBeatCount = (self->scaledBeatCounter / truncation) * truncation;
+        float measurePhaseInTrunc = fmodf(scaledClockPhase + self->scaledBeatCounter, truncation) / self->beatsPerMeasure;
         float measureOffset = ((float) truncatedBeatCount) / self->beatsPerMeasure;
 
         // Normally the subdivision phase is just the fractional component of the subdivision count.
@@ -263,7 +266,7 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
 
         // Next subdivision would go past the end of the measure
         if (
-            truncatedBeatCount / ins->truncation == ins->truncation - 1 &&
+            truncatedBeatCount / truncation == truncation - 1 &&
             nextSubdivisionProgress / self->subdivisionsPerMeasure + measureOffset > 1.0
         ) {
             subdivision = fmodf(subdivisionProgress, 1.0f);
@@ -273,10 +276,10 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
 
         // Next subdivision would go past the next truncation
         else if (
-            nextSubdivisionProgress / self->subdivisionsPerMeasure > ((float) ins->truncation) / self->beatsPerMeasure
+            nextSubdivisionProgress / self->subdivisionsPerMeasure > ((float) truncation) / self->beatsPerMeasure
         ) {
             subdivision = fmodf(subdivisionProgress, 1.0f);
-            subdivision /= ((float) ins->truncation) / self->beatsPerMeasure - floor(subdivisionProgress) / self->subdivisionsPerMeasure;
+            subdivision /= ((float) truncation) / self->beatsPerMeasure - floor(subdivisionProgress) / self->subdivisionsPerMeasure;
             subdivision *= subdivisionFrac;
         }
 
