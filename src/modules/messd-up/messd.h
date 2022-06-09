@@ -22,10 +22,14 @@
 typedef struct messd
 {
     t_phase_locked_loop p_locked_loop;
+    phasor_t internalClock;
 
     uint8_t beatsPerMeasure;
     uint8_t subdivisionsPerMeasure;
 
+    uint8_t lastClock;
+    float measuredPeriod;
+    float msSinceLastLeadingEdge;
     float lastRootClockPhase;
     float lastScaledClockPhase;
     uint8_t beatCounter;

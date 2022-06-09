@@ -5,6 +5,7 @@
 void MS_init(messd_t *self)
 {
     phase_locked_loop_init(&self->p_locked_loop);
+    phasor_init(&self->internalClock);
 
     self->beatsPerMeasure = 1;
     self->subdivisionsPerMeasure = 0;
@@ -13,6 +14,9 @@ void MS_init(messd_t *self)
     self->lastModulationSwitch = false;
     self->lastModulationSignal = false;
     self->inRoundTripModulation = false;
+    self->lastClock = 0;
+    self->measuredPeriod = 0.0f;
+    self->msSinceLastLeadingEdge = 500.0f; //120 bpm
 
     self->beatCounter = 0;
     self->scaledBeatCounter = 0;
@@ -178,19 +182,21 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     int pll_in = -1;
     outs->eom = false;
 
-    // ==== Root clock calculations
-
-    // Calculate clock based on tempo in
-    float phaseDelta = (ins->tempo * ins->delta) / MS_PER_MINUTE;
-
-    // Decide whether or not to use it based on input
-    if (ins->ext_clock_connected) {
-        pll_in = ins->ext_clock > 0.5; // clock in is a pulse train
+    // Handle a leading edge
+    if (ins->ext_clock && !self->lastClock) {
+        // Force our internal clock into alignment
+        phasor_set_phase(&self->internalClock, 0.0f);
+        self->measuredPeriod = self->msSinceLastLeadingEdge == 0.0f ? 500.0f : self->msSinceLastLeadingEdge;
+        self->msSinceLastLeadingEdge = 0.0f;
     } else {
-        phase_locked_loop_set_frequency(&self->p_locked_loop, phaseDelta);
+        self->msSinceLastLeadingEdge += ins->delta;
     }
-    rootClockPhase = phase_locked_loop_process(&self->p_locked_loop, &pll_in);
-    outs->measuredTempo = self->p_locked_loop._frequency * MS_PER_MINUTE / ins->delta;
+    self->lastClock = ins->ext_clock;
+
+    rootClockPhase = phasor_step(&self->internalClock, ins->delta / self->measuredPeriod);
+
+    // ==== Root clock calculations
+    outs->measuredTempo = MS_PER_MINUTE / self->measuredPeriod;
 
     // Count beats on the clock
     if (self->lastRootClockPhase > rootClockPhase) {
