@@ -21,7 +21,6 @@
   */
 typedef struct messd
 {
-    t_phase_locked_loop p_locked_loop;
     phasor_t internalClock;
 
     uint8_t beatsPerMeasure;
@@ -56,7 +55,6 @@ typedef struct messd_ins
     uint8_t truncation;
     double ext_clock;
 
-    bool ext_clock_connected; // true if an external clock is connected
     bool modulationSignal; // continuous modulation signal
     bool modulationSwitch; // modulation pushbutton
     bool latchChangesToDownbeat;
@@ -96,21 +94,6 @@ void MS_init(messd_t *self);
  * Frees the 'messd' struct
  * */
 void MS_destroy(messd_t *self);
-
-/**
- * Provide a hint for the wavelength of a clock cycle
- */
-void MS_clock_wavelength_hint(messd_t *self, float hint);
-
-/**
- * Set the numerator (multiplier) of the output clock frequency
- */
-void MS_set_output_multiplier(messd_t *self, int multiplier);
-
-/**
- * Set the dividend (divisor) of the output clock frequency
- */
-void MS_set_output_divisor(messd_t *self, int divisor);
 
 /**
  * Processes the incoming CV data in main.cpp

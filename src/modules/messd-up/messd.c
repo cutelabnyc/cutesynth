@@ -4,7 +4,6 @@
 
 void MS_init(messd_t *self)
 {
-    phase_locked_loop_init(&self->p_locked_loop);
     phasor_init(&self->internalClock);
 
     self->beatsPerMeasure = 1;
@@ -153,21 +152,6 @@ static void _MS_handleLatch(messd_t *self, messd_ins_t *ins)
         ins->subdivisionsPerMeasure = self->subdivisionsPerMeasure;
         ins->beatsPerMeasure = self->beatsPerMeasure;
     }
-}
-
-void MS_clock_wavelength_hint(messd_t *self, float hint)
-{
-    phase_locked_loop_hint(&self->p_locked_loop, hint);
-}
-
-void MS_set_output_multiplier(messd_t *self, int multiplier)
-{
-    phase_locked_loop_set_numerator(&self->p_locked_loop, multiplier);
-}
-
-void MS_set_output_divisor(messd_t *self, int divisor)
-{
-    phase_locked_loop_set_denominator(&self->p_locked_loop, divisor);
 }
 
 void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
