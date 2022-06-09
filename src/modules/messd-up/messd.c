@@ -128,12 +128,8 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
     self->modulationPending = false;
 }
 
-static void _MS_handleLatch(messd_t *self, messd_ins_t *ins)
+static void _MS_handleLatchHelper(messd_t *self, messd_ins_t *ins)
 {
-    // Update the beats and the subdivisions
-    self->beatsPerMeasure = ins->beatsPerMeasure;
-    self->subdivisionsPerMeasure = ins->subdivisionsPerMeasure;
-
     if (ins->reset)
     {
         self->tempoMultiply = 1;
@@ -152,6 +148,22 @@ static void _MS_handleLatch(messd_t *self, messd_ins_t *ins)
         ins->subdivisionsPerMeasure = self->subdivisionsPerMeasure;
         ins->beatsPerMeasure = self->beatsPerMeasure;
     }
+}
+
+static void _MS_handleLatchBeats(messd_t *self, messd_ins_t *ins)
+{
+    // Update beats
+    self->beatsPerMeasure = ins->beatsPerMeasure;
+
+    _MS_handleLatchHelper(self, ins);
+}
+
+static void _MS_handleLatchDivs(messd_t *self, messd_ins_t *ins)
+{
+    // Update subdivisions
+    self->subdivisionsPerMeasure = ins->subdivisionsPerMeasure;
+
+    _MS_handleLatchHelper(self, ins);
 }
 
 void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
@@ -207,9 +219,13 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
         self->scaledBeatCounter = (self->scaledBeatCounter + 1) % self->beatsPerMeasure;
 
         // Handle changes
-        if (!(ins->latchChangesToDownbeat && self->scaledBeatCounter != 0))
+        if (!(ins->latchBeatChangesToDownbeat && self->scaledBeatCounter != 0))
         {
-            _MS_handleLatch(self, ins);
+            _MS_handleLatchBeats(self, ins);
+        }
+        if (!(ins->latchDivChangesToDownbeat && self->scaledBeatCounter != 0))
+        {
+            _MS_handleLatchDivs(self, ins);
         }
 
         // Then handle modulation changes

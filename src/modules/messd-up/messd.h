@@ -57,7 +57,8 @@ typedef struct messd_ins
 
     bool modulationSignal; // continuous modulation signal
     bool modulationSwitch; // modulation pushbutton
-    bool latchChangesToDownbeat;
+    bool latchBeatChangesToDownbeat;
+    bool latchDivChangesToDownbeat;
     bool latchModulationToDownbeat;
     bool invert;
     bool isRoundTrip;
