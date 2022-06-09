@@ -157,7 +157,7 @@ static void _MS_handleLatch(messd_t *self, messd_ins_t *ins)
 
 void MS_clock_wavelength_hint(messd_t *self, float hint)
 {
-	phase_locked_loop_hint(&self->p_locked_loop, hint);
+    phase_locked_loop_hint(&self->p_locked_loop, hint);
 }
 
 void MS_set_output_multiplier(messd_t *self, int multiplier)
@@ -208,7 +208,7 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     scaledClockPhase = rootClockPhase + self->beatCounter;
     scaledClockPhase *= self->tempoMultiply;
     scaledClockPhase /= self->tempoDivide;
-	scaledClockPhase = fmod(scaledClockPhase, 1.0f);
+    scaledClockPhase = fmod(scaledClockPhase, 1.0f);
 
     // ==== Output calculation
 
@@ -258,8 +258,8 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
         // Normally the subdivision phase is just the fractional component of the subdivision count.
         // This changes however if we would overlap with the next truncation, or the end of the measure
         float subdivisionProgress = measurePhaseInTrunc * self->subdivisionsPerMeasure;
-		float nextSubdivisionProgress = ceil(subdivisionProgress);
-		float subdivisionFrac = 1.0 / self->subdivisionsPerMeasure;
+        float nextSubdivisionProgress = ceil(subdivisionProgress);
+        float subdivisionFrac = 1.0 / self->subdivisionsPerMeasure;
 
         // Next subdivision would go past the end of the measure
         if (
@@ -267,8 +267,8 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
             nextSubdivisionProgress / self->subdivisionsPerMeasure + measureOffset > 1.0
         ) {
             subdivision = fmodf(subdivisionProgress, 1.0f);
-			subdivision /= (1.0 - (measureOffset + floor(subdivisionProgress) / self->subdivisionsPerMeasure));
-			subdivision *= subdivisionFrac;
+            subdivision /= (1.0 - (measureOffset + floor(subdivisionProgress) / self->subdivisionsPerMeasure));
+            subdivision *= subdivisionFrac;
         }
 
         // Next subdivision would go past the next truncation
@@ -277,7 +277,7 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
         ) {
             subdivision = fmodf(subdivisionProgress, 1.0f);
             subdivision /= ((float) ins->truncation) / self->beatsPerMeasure - floor(subdivisionProgress) / self->subdivisionsPerMeasure;
-			subdivision *= subdivisionFrac;
+            subdivision *= subdivisionFrac;
         }
 
         // "Normal" situation
