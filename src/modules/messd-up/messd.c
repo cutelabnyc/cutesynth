@@ -246,7 +246,7 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     // Calculate downbeat
     measurePhase = scaledClockPhase + self->scaledBeatCounter;
     measurePhase /= self->beatsPerMeasure;
-    outs->downbeat = measurePhase < ins->pulseWidth;
+    outs->downbeat = measurePhase < (ins->pulseWidth / ((float) self->beatsPerMeasure)) ;
 
     // Calculate subdivisions
     subdivision = fmod(measurePhase * self->subdivisionsPerMeasure, 1.0f);
