@@ -2,6 +2,9 @@
 
 #include <math.h>
 
+#define MAX_TEMPO (1000)
+#define MIN_TEMPO (12)
+
 void MS_init(messd_t *self)
 {
     phasor_init(&self->internalClock);
@@ -103,6 +106,18 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
             self->tempoMultiply *= ins->subdivisionsPerMeasure;
             self->tempoDivide *= ins->beatsPerMeasure;
             reduceFraction(self->tempoMultiply, self->tempoDivide, &self->tempoMultiply, &self->tempoDivide);
+
+            // Handle wraparound
+            while (self->measuredTempo * ((float) self->tempoMultiply) / ((float) self->tempoDivide) > MAX_TEMPO) {
+                self->tempoDivide *= 2;
+                reduceFraction(self->tempoMultiply, self->tempoDivide, &self->tempoMultiply, &self->tempoDivide);
+            }
+
+            while (self->measuredTempo * ((float) self->tempoMultiply) / ((float) self->tempoDivide) < MIN_TEMPO) {
+                self->tempoMultiply *= 2;
+                reduceFraction(self->tempoMultiply, self->tempoDivide, &self->tempoMultiply, &self->tempoDivide);
+            }
+
             self->subdivisionsPerMeasure = self->beatsPerMeasure;
 
             // Set subdivisions equal to beats upon metric modulation
@@ -195,7 +210,7 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     rootClockPhase = phasor_step(&self->internalClock, ins->delta / self->measuredPeriod);
 
     // ==== Root clock calculations
-    outs->measuredTempo = MS_PER_MINUTE / self->measuredPeriod;
+    self->measuredTempo = outs->measuredTempo = MS_PER_MINUTE / self->measuredPeriod;
 
     // Count beats on the clock
     if (self->lastRootClockPhase - rootClockPhase > 0.5) {
