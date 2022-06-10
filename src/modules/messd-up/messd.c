@@ -109,13 +109,13 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
 
             float wrappedTempo = self->measuredTempo * ((float) self->tempoMultiply) / ((float) self->tempoDivide);
 
-            if (wrappedTempo > MAX_TEMPO || wrappedTempo < MIN_TEMPO) {
-                while (wrappedTempo > MAX_TEMPO) wrappedTempo /= 2.0f;
-                while (wrappedTempo < MIN_TEMPO) wrappedTempo *= 2.0f;
-                self->tempoDivide = floorf(self->measuredTempo);
-                self->tempoMultiply = floorf(wrappedTempo);
-                reduceFraction(self->tempoMultiply, self->tempoDivide, &self->tempoMultiply, &self->tempoDivide);
-            }
+            // if (wrappedTempo > MAX_TEMPO || wrappedTempo < MIN_TEMPO) {
+            //     while (wrappedTempo > MAX_TEMPO) wrappedTempo /= 2.0f;
+            //     while (wrappedTempo < MIN_TEMPO) wrappedTempo *= 2.0f;
+            //     self->tempoDivide = floorf(self->measuredTempo);
+            //     self->tempoMultiply = floorf(wrappedTempo);
+            //     reduceFraction(self->tempoMultiply, self->tempoDivide, &self->tempoMultiply, &self->tempoDivide);
+            // }
 
             self->subdivisionsPerMeasure = self->beatsPerMeasure;
 
