@@ -130,12 +130,6 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
 
 static void _MS_handleLatchHelper(messd_t *self, messd_ins_t *ins)
 {
-    if (ins->reset)
-    {
-        self->tempoMultiply = 1;
-        self->tempoDivide = 1;
-    }
-
     // Check to apply an invert
     if (ins->invert && !self->invertNeedsReset)
     {
@@ -177,6 +171,15 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     double phasor = 0;
     int pll_in = -1;
     outs->eom = false;
+
+    if (ins->reset) {
+        self->inRoundTripModulation = false;
+        self->modulationPending = false;
+        self->tempoMultiply = 1;
+        self->tempoDivide = 1;
+        self->previousTempoMultiply = 1;
+        self->previousTempoDivide = 1;
+    }
 
     // Handle a leading edge
     if (ins->ext_clock && !self->lastClock) {
