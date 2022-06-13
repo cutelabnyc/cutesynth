@@ -42,6 +42,7 @@ typedef struct messd
     bool invertNeedsReset;
     bool modulationPending;
     bool resetPending;
+    bool modulateOnEdgeEnabled;
 
     uint16_t tempoMultiply;
     uint16_t tempoDivide;

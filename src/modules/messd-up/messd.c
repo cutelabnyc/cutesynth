@@ -30,6 +30,7 @@ void MS_init(messd_t *self)
     self->invertNeedsReset = false;
     self->modulationPending = false;
     self->resetPending = false;
+    self->modulateOnEdgeEnabled = true;
 }
 
 void MS_destroy(messd_t *self)
@@ -91,9 +92,13 @@ static void _MS_handleModulation(messd_t *self, messd_ins_t *ins)
         }
     }
 
-    // Leading edge on modulate button
-    if (!self->lastModulationSwitch && ins->modulationSwitch) {
+    // Lagging edge on modulate button
+    if (self->modulateOnEdgeEnabled && self->lastModulationSwitch && !ins->modulationSwitch) {
         _MS_setModulationPending(self, !self->modulationPending);
+    }
+
+    if (!ins->modulationSwitch) {
+        self->modulateOnEdgeEnabled = true;
     }
 
     // Any reset
@@ -117,6 +122,7 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
             self->tempoDivide = 1;
             self->previousTempoMultiply = 1;
             self->previousTempoDivide = 1;
+            self->modulateOnEdgeEnabled = false;
             outs->eom = true;
         } if (!self->inRoundTripModulation) {
             if (ins->isRoundTrip)
