@@ -71,6 +71,7 @@ typedef struct messd_ins
     double pulseWidth;
 
     double delta;
+    unsigned long microsClockOffset;
 } messd_ins_t;
 
 typedef struct messd_outs

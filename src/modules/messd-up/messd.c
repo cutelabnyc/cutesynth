@@ -232,7 +232,7 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
         // Force our internal clock into alignment
         phasor_set_phase(&self->internalClock, 0.0f);
         self->measuredPeriod = self->msSinceLastLeadingEdge == 0.0f ? 500.0f : self->msSinceLastLeadingEdge;
-        self->msSinceLastLeadingEdge = 0.0f;
+        self->msSinceLastLeadingEdge = ((float) ins->microsClockOffset / 1000.0f);
     } else {
         self->msSinceLastLeadingEdge += ins->delta;
     }
