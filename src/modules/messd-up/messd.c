@@ -105,6 +105,7 @@ static void _MS_handleModulation(messd_t *self, messd_ins_t *ins)
     if (ins->reset && !self->resetPending) {
         _MS_setModulationPending(self, true);
         self->resetPending = true;
+        self->modulateOnEdgeEnabled = false;
     }
 
     self->lastModulationSignal = ins->modulationSignal;
@@ -122,7 +123,6 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
             self->tempoDivide = 1;
             self->previousTempoMultiply = 1;
             self->previousTempoDivide = 1;
-            self->modulateOnEdgeEnabled = false;
             outs->eom = true;
         } if (!self->inRoundTripModulation) {
             if (ins->isRoundTrip)
