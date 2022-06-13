@@ -29,6 +29,7 @@ void MS_init(messd_t *self)
 
     self->invertNeedsReset = false;
     self->modulationPending = false;
+    self->resetPending = false;
 }
 
 void MS_destroy(messd_t *self)
@@ -51,6 +52,16 @@ static void reduceFraction(uint16_t n_in, uint16_t d_in, uint16_t *n_out, uint16
     }
 }
 
+static void _MS_setModulationPending(messd_t *self, bool pending)
+{
+    if (pending) {
+        self->modulationPending = true;
+    } else {
+        self->modulationPending = false;
+        self->resetPending = false;
+    }
+}
+
 static void _MS_handleModulation(messd_t *self, messd_ins_t *ins)
 {
     // Leading edge on modulation signal
@@ -60,9 +71,9 @@ static void _MS_handleModulation(messd_t *self, messd_ins_t *ins)
         // and already modulated
 
         if (self->inRoundTripModulation && self->modulationPending) {
-            self->modulationPending = false; // cancel the modulation
+            _MS_setModulationPending(self, false);
         } else {
-            self->modulationPending = true;
+            _MS_setModulationPending(self, true);
         }
     }
 
@@ -73,16 +84,22 @@ static void _MS_handleModulation(messd_t *self, messd_ins_t *ins)
         // If not, it cancels the pending modulation
         if (ins->isRoundTrip) {
             if (self->inRoundTripModulation) {
-                self->modulationPending = true;
+                _MS_setModulationPending(self, true);
             } else if (self->modulationPending) {
-                self->modulationPending = false;
+                _MS_setModulationPending(self, false);
             }
         }
     }
 
     // Leading edge on modulate button
     if (!self->lastModulationSwitch && ins->modulationSwitch) {
-        self->modulationPending = !self->modulationPending;
+        _MS_setModulationPending(self, !self->modulationPending);
+    }
+
+    // Any reset
+    if (ins->reset) {
+        _MS_setModulationPending(self, true);
+        self->resetPending =true;
     }
 
     self->lastModulationSignal = ins->modulationSignal;
@@ -93,7 +110,15 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
 {
     if (self->modulationPending)
     {
-        if (!self->inRoundTripModulation) {
+        if (self->resetPending) {
+            self->inRoundTripModulation = false;
+            self->modulationPending = false;
+            self->tempoMultiply = 1;
+            self->tempoDivide = 1;
+            self->previousTempoMultiply = 1;
+            self->previousTempoDivide = 1;
+            outs->eom = true;
+        } if (!self->inRoundTripModulation) {
             if (ins->isRoundTrip)
             {
                 self->previousTempoMultiply = self->tempoMultiply;
@@ -149,7 +174,7 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
         self->inRoundTripModulation = false;
     }
 
-    self->modulationPending = false;
+    _MS_setModulationPending(self, false);
 }
 
 static void _MS_handleLatchHelper(messd_t *self, messd_ins_t *ins)
@@ -195,15 +220,6 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     double phasor = 0;
     int pll_in = -1;
     outs->eom = false;
-
-    if (ins->reset) {
-        self->inRoundTripModulation = false;
-        self->modulationPending = false;
-        self->tempoMultiply = 1;
-        self->tempoDivide = 1;
-        self->previousTempoMultiply = 1;
-        self->previousTempoDivide = 1;
-    }
 
     // Handle a leading edge
     if (ins->ext_clock && !self->lastClock) {
@@ -331,6 +347,7 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     // Set modulate pending output
     // Note the special case here
     outs->modulationPending = self->modulationPending || (!ins->isRoundTrip && self->inRoundTripModulation);
+    outs->resetPending = self->resetPending;
     outs->inRoundTripModulation = self->inRoundTripModulation;
 
     self->lastScaledClockPhase = scaledClockPhase;

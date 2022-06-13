@@ -41,6 +41,7 @@ typedef struct messd
     bool inRoundTripModulation;
     bool invertNeedsReset;
     bool modulationPending;
+    bool resetPending;
 
     uint16_t tempoMultiply;
     uint16_t tempoDivide;
@@ -82,6 +83,7 @@ typedef struct messd_outs
 
     bool invert;
     bool modulationPending; // High when modulation trigger is active
+    bool resetPending; // High when the next modulation is resetting
     bool inRoundTripModulation; // High when a round trip modulation is active
     uint8_t subdivisions; // The number of subdivisions in use, after modulation
 	double scaledTempo; // Output tempo after scaling
