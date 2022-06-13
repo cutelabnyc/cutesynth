@@ -97,7 +97,7 @@ static void _MS_handleModulation(messd_t *self, messd_ins_t *ins)
     }
 
     // Any reset
-    if (ins->reset) {
+    if (ins && !self->resetPending) {
         _MS_setModulationPending(self, true);
         self->resetPending =true;
     }
