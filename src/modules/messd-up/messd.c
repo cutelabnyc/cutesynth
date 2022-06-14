@@ -234,14 +234,15 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
         phasor_set_phase(&self->internalClock, 0.0f);
         self->measuredPeriod = self->msSinceLastLeadingEdge == 0.0f ? 500.0f : self->msSinceLastLeadingEdge;
         self->measuredPeriod -= microsOffset;
-        if (ins->cheatedMeasuredPeriod > 0) {
-            self->measuredPeriod = ((float) ins->cheatedMeasuredPeriod) / 1000.0f;
-        }
         self->msSinceLastLeadingEdge = microsOffset;
     } else {
         self->msSinceLastLeadingEdge += ins->delta;
     }
     self->lastClock = ins->ext_clock;
+
+    if (ins->cheatedMeasuredPeriod > 0) {
+        self->measuredPeriod = ((float) ins->cheatedMeasuredPeriod) / 1000.0f;
+    }
 
     rootClockPhase = phasor_step(&self->internalClock, ins->delta / self->measuredPeriod);
 
