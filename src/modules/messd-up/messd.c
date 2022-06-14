@@ -230,9 +230,11 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     // Handle a leading edge
     if (ins->ext_clock && !self->lastClock) {
         // Force our internal clock into alignment
+        float microsOffset = ((float) ins->microsClockOffset / 1000.0f);
         phasor_set_phase(&self->internalClock, 0.0f);
         self->measuredPeriod = self->msSinceLastLeadingEdge == 0.0f ? 500.0f : self->msSinceLastLeadingEdge;
-        self->msSinceLastLeadingEdge = ((float) ins->microsClockOffset / 1000.0f);
+        self->measuredPeriod -= microsOffset;
+        self->msSinceLastLeadingEdge = microsOffset;
     } else {
         self->msSinceLastLeadingEdge += ins->delta;
     }
