@@ -72,6 +72,7 @@ typedef struct messd_ins
 
     double delta;
     unsigned long microsClockOffset;
+    unsigned long cheatedMeasuredPeriod;
 } messd_ins_t;
 
 typedef struct messd_outs
