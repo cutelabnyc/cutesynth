@@ -124,7 +124,7 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
             self->previousTempoMultiply = 1;
             self->previousTempoDivide = 1;
             outs->eom = true;
-        } if (!self->inRoundTripModulation) {
+        } else if (!self->inRoundTripModulation) {
             if (ins->isRoundTrip)
             {
                 self->previousTempoMultiply = self->tempoMultiply;
