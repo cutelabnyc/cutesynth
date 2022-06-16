@@ -74,6 +74,7 @@ typedef struct messd_ins
     bool invert;
     bool isRoundTrip;
     bool reset;
+    bool resetBeatCount;
 
     float phase;
     float pulseWidth;

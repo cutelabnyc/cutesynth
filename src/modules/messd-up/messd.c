@@ -363,6 +363,18 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     phasor = fmod(scaledClockPhase + ins->phase, 1.0f);
     outs->phase = phasor < ins->pulseWidth;
 
+    // Handle an input resetBeatCount
+    if (ins->resetBeatCount) {
+        if (rootClockPhase < 0.5) {
+            if (self->beatCounter != 0) {
+                self->beatCounter = 0;
+                outs->downbeat = 1;
+            }
+        } else {
+            self->beatCounter = self->beatsPerMeasure - 1;
+        }
+    }
+
     // Set tempo out
     outs->scaledTempo = (outs->measuredTempo * self->tempoMultiply) / self->tempoDivide;
 
