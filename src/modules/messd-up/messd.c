@@ -265,7 +265,7 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
         self->measuredPeriod = ((float) ins->cheatedMeasuredPeriod) / 1000.0f;
     }
 
-    rootClockPhase = phasor_step(&self->internalClock, ins->delta / self->measuredPeriod);
+    rootClockPhase = fmodf(phasor_step(&self->internalClock, ins->delta / self->measuredPeriod), 1.0f);
 
     // ==== Root clock calculations
     self->measuredTempo = outs->measuredTempo = MS_PER_MINUTE / self->measuredPeriod;
