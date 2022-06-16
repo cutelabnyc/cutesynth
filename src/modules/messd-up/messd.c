@@ -235,7 +235,7 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
             self->beatCounter = 0;
             self->scaledBeatCounter = 0;
         } else {
-            self->beatCounter = self->beatsPerMeasure - 1;
+            self->beatCounter = self->tempoDivide - 1;
             self->scaledBeatCounter = self->beatsPerMeasure - 1;
         }
     }
