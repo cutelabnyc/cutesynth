@@ -29,6 +29,7 @@ void MS_init(messd_t *self)
     self->tempoDivide = 1;
     self->previousTempoMultiply = 1;
     self->previousTempoDivide = 1;
+    self->previousSubdivisionsPerMeasure = 2;
 
     self->invertNeedsReset = false;
     self->modulationPending = false;
@@ -132,6 +133,7 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
             {
                 self->previousTempoMultiply = self->tempoMultiply;
                 self->previousTempoDivide = self->tempoDivide;
+                self->previousSubdivisionsPerMeasure = self->subdivisionsPerMeasure;
                 self->inRoundTripModulation = true;
             } else {
                 self->inRoundTripModulation = false;
@@ -179,6 +181,8 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
     if (self->inRoundTripModulation && !ins->isRoundTrip) {
         self->tempoMultiply = self->previousTempoMultiply;
         self->tempoDivide = self->previousTempoDivide;
+        self->subdivisionsPerMeasure = self->previousSubdivisionsPerMeasure;
+        ins->subdivisionsPerMeasure = self->subdivisionsPerMeasure;
         outs->eom = true;
         self->inRoundTripModulation = false;
     }

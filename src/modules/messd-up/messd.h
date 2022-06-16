@@ -56,6 +56,7 @@ typedef struct messd
     uint16_t tempoDivide;
     uint16_t previousTempoMultiply;
     uint16_t previousTempoDivide;
+    uint8_t previousSubdivisionsPerMeasure;
 } messd_t;
 
 typedef struct messd_ins
