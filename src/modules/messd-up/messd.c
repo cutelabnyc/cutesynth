@@ -271,6 +271,17 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     scaledClockPhase /= self->tempoDivide;
     scaledClockPhase = fmod(scaledClockPhase, 1.0f);
 
+    // -- Handle an input resetBeatCount
+    if (ins->resetBeatCount) {
+        if (rootClockPhase < 0.5) {
+            if (self->scaledBeatCounter != 0) {
+                self->scaledBeatCounter = 0;
+            }
+        } else {
+            self->scaledBeatCounter = self->beatsPerMeasure - 1;
+        }
+    }
+
     // ==== Output calculation
 
     outs->beat = scaledClockPhase < ins->pulseWidth;
@@ -306,18 +317,6 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     }
 
     // Calculate downbeat
-    // -- Handle an input resetBeatCount
-    if (ins->resetBeatCount) {
-        if (rootClockPhase < 0.5) {
-            if (self->scaledBeatCounter != 0) {
-                self->scaledBeatCounter = 0;
-            }
-        } else {
-            self->scaledBeatCounter = self->beatsPerMeasure - 1;
-        }
-    }
-
-    // -- do the downbeat
     measurePhase = scaledClockPhase + self->scaledBeatCounter;
     measurePhase /= self->beatsPerMeasure;
     outs->downbeat = measurePhase < (ins->pulseWidth / ((float) self->beatsPerMeasure)) ;
