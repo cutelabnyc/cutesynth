@@ -259,6 +259,19 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     // ==== Root clock calculations
     self->measuredTempo = outs->measuredTempo = MS_PER_MINUTE / self->measuredPeriod;
 
+    // -- Handle an input resetBeatCount
+    if (ins->resetBeatCount) {
+        if (rootClockPhase < 0.5) {
+            if (self->beatCounter != 0) {
+                self->beatCounter = 0;
+                self->scaledBeatCounter = 0;
+            }
+        } else {
+            self->beatCounter = self->beatsPerMeasure - 1;
+            self->scaledBeatCounter = self->beatsPerMeasure - 1;
+        }
+    }
+
     // Count beats on the clock
     if (self->lastRootClockPhase - rootClockPhase > 0.5) {
         self->beatCounter = (self->beatCounter + 1) % self->tempoDivide;
@@ -270,17 +283,6 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     scaledClockPhase *= self->tempoMultiply;
     scaledClockPhase /= self->tempoDivide;
     scaledClockPhase = fmod(scaledClockPhase, 1.0f);
-
-    // -- Handle an input resetBeatCount
-    if (ins->resetBeatCount) {
-        if (rootClockPhase < 0.5) {
-            if (self->scaledBeatCounter != 0) {
-                self->scaledBeatCounter = 0;
-            }
-        } else {
-            self->scaledBeatCounter = self->beatsPerMeasure - 1;
-        }
-    }
 
     // ==== Output calculation
 
