@@ -256,17 +256,6 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
 
     rootClockPhase = fmodf(phasor_step(&self->internalClock, ins->delta / self->measuredPeriod), 1.0f);
 
-    // -- Handle an input resetBeatCount
-    if (ins->resetBeatCount) {
-        if (rootClockPhase < 0.5) {
-            self->beatCounter = 0;
-            self->scaledBeatCounter = 0;
-        } else {
-            self->beatCounter = self->tempoDivide - 1;
-            self->scaledBeatCounter = self->beatsPerMeasure - 1;
-        }
-    }
-
     // ==== Root clock calculations
     self->measuredTempo = outs->measuredTempo = MS_PER_MINUTE / self->measuredPeriod;
 
@@ -316,10 +305,21 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
         self->invertNeedsReset = false;
     }
 
+    // -- Handle an input resetBeatCount
+    if (ins->resetBeatCount) {
+        if (rootClockPhase < 0.5) {
+            self->beatCounter = 0;
+            self->scaledBeatCounter = 0;
+        } else {
+            self->beatCounter = self->tempoDivide - 1;
+            self->scaledBeatCounter = self->beatsPerMeasure - 1;
+        }
+    }
+
     // Calculate downbeat
     measurePhase = scaledClockPhase + self->scaledBeatCounter;
     measurePhase /= self->beatsPerMeasure;
-    outs->downbeat = measurePhase < (ins->pulseWidth / ((float) self->beatsPerMeasure)) ;
+    outs->downbeat = measurePhase < (ins->pulseWidth / ((float) self->beatsPerMeasure));
 
     // Calculate subdivisions
     subdivision = fmod(measurePhase * self->subdivisionsPerMeasure, 1.0f);
