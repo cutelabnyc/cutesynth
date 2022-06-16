@@ -18,7 +18,10 @@ void MS_init(messd_t *self)
     self->inRoundTripModulation = false;
     self->lastClock = 0;
     self->measuredPeriod = 0.0f;
+
+#ifdef TRACK_INPUT_CLOCK_PERIOD
     self->msSinceLastLeadingEdge = 500.0f; //120 bpm
+#endif
 
     self->beatCounter = 0;
     self->scaledBeatCounter = 0;
@@ -219,15 +222,16 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
 {
     float rootClockPhase = 0;
     float scaledClockPhase = 0;
-    double measurePhase = 0;
-    double measurePhaseFloor = 0;
-    double measurePhaseCeiling = 0;
-    double subdivision = 0;
-    double phasor = 0;
-    int pll_in = -1;
+    float measurePhase = 0;
+    float measurePhaseFloor = 0;
+    float measurePhaseCeiling = 0;
+    float subdivision = 0;
+    float phasor = 0;
     outs->eom = false;
 
     // Handle a leading edge
+
+#ifdef TRACK_INPUT_CLOCK_PERIOD
     if (ins->ext_clock && !self->lastClock) {
         // Force our internal clock into alignment
         float microsOffset = ((float) ins->microsClockOffset / 1000.0f);
@@ -238,6 +242,12 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     } else {
         self->msSinceLastLeadingEdge += ins->delta;
     }
+#else
+    if (ins->ext_clock && !self->lastClock) {
+        phasor_set_phase(&self->internalClock, 0.0f);
+    }
+#endif
+
     self->lastClock = ins->ext_clock;
 
     if (ins->cheatedMeasuredPeriod > 0) {

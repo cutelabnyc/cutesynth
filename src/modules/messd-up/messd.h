@@ -16,6 +16,11 @@
 #define NUM_DIVISION_VALUES 10
 #define MS_PER_MINUTE 60000
 
+// Uncomment to track the input clock period internally. If you
+// can measure the clock externally, pass it to cheatedMeasuredPeriod
+// and leave this commented out to save on program memory
+// #define TRACK_INPUT_CLOCK_PERIOD
+
  /**
   * messd_t: Module's main data structure
   */
@@ -28,11 +33,14 @@ typedef struct messd
 
     uint8_t lastClock;
     float measuredPeriod;
-    float msSinceLastLeadingEdge;
     float lastRootClockPhase;
     float lastScaledClockPhase;
     float measuredTempo;
     uint8_t beatCounter;
+
+#ifdef TRACK_INPUT_CLOCK_PERIOD
+    float msSinceLastLeadingEdge;
+#endif
 
     uint8_t scaledBeatCounter;
 
@@ -52,11 +60,11 @@ typedef struct messd
 
 typedef struct messd_ins
 {
-    double tempo;
+    float tempo;
     uint8_t beatsPerMeasure;
     uint8_t subdivisionsPerMeasure;
     float truncation; // normalized to the number of beats
-    double ext_clock;
+    float ext_clock;
 
     bool modulationSignal; // continuous modulation signal
     bool modulationSwitch; // modulation pushbutton
@@ -67,12 +75,15 @@ typedef struct messd_ins
     bool isRoundTrip;
     bool reset;
 
-    double phase;
-    double pulseWidth;
+    float phase;
+    float pulseWidth;
 
-    double delta;
-    unsigned long microsClockOffset;
+    float delta;
     unsigned long cheatedMeasuredPeriod;
+
+#ifdef TRACK_INPUT_CLOCK_PERIOD
+    unsigned long microsClockOffset;
+#endif
 } messd_ins_t;
 
 typedef struct messd_outs
@@ -89,8 +100,8 @@ typedef struct messd_outs
     bool resetPending; // High when the next modulation is resetting
     bool inRoundTripModulation; // High when a round trip modulation is active
     uint8_t subdivisions; // The number of subdivisions in use, after modulation
-	double scaledTempo; // Output tempo after scaling
-    double measuredTempo; // Measured tempo of the external clock
+	float scaledTempo; // Output tempo after scaling
+    float measuredTempo; // Measured tempo of the external clock
 } messd_outs_t;
 
 /**
