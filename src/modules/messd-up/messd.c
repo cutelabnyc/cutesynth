@@ -171,6 +171,8 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
         } else {
             self->tempoMultiply = self->previousTempoMultiply;
             self->tempoDivide = self->previousTempoDivide;
+            self->subdivisionsPerMeasure = self->previousSubdivisionsPerMeasure;
+            ins->subdivisionsPerMeasure = self->subdivisionsPerMeasure;
             outs->eom = true;
             self->inRoundTripModulation = false;
         }
