@@ -229,17 +229,6 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     float phasor = 0;
     outs->eom = false;
 
-    // -- Handle an input resetBeatCount
-    if (ins->resetBeatCount) {
-        if (rootClockPhase < 0.5) {
-            self->beatCounter = 0;
-            self->scaledBeatCounter = 0;
-        } else {
-            self->beatCounter = self->tempoDivide - 1;
-            self->scaledBeatCounter = self->beatsPerMeasure - 1;
-        }
-    }
-
     // Handle a leading edge
 
 #ifdef TRACK_INPUT_CLOCK_PERIOD
@@ -266,6 +255,17 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     }
 
     rootClockPhase = fmodf(phasor_step(&self->internalClock, ins->delta / self->measuredPeriod), 1.0f);
+
+    // -- Handle an input resetBeatCount
+    if (ins->resetBeatCount) {
+        if (rootClockPhase < 0.5) {
+            self->beatCounter = 0;
+            self->scaledBeatCounter = 0;
+        } else {
+            self->beatCounter = self->tempoDivide - 1;
+            self->scaledBeatCounter = self->beatsPerMeasure - 1;
+        }
+    }
 
     // ==== Root clock calculations
     self->measuredTempo = outs->measuredTempo = MS_PER_MINUTE / self->measuredPeriod;
