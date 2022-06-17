@@ -286,19 +286,6 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
 
     // -- Handle an input resetBeatCount
     bool forceLatchEvent = 0;
-    if (ins->resetBeatCount) {
-        if (rootClockPhase < 0.5) {
-            // Need to add a little bit of complex logic here, since we're basically saying that
-            // the last beat event _should_ have been a downbeat. We can't have known that a
-            // reset event was coming, so we need to handle downbeat latching now, on the reset
-            forceLatchEvent = true;
-            self->beatCounter = 0;
-            self->scaledBeatCounter = 0;
-        } else {
-            self->beatCounter = self->tempoDivide - 1;
-            self->scaledBeatCounter = self->beatsPerMeasure - 1;
-        }
-    }
 
     // Latch to beat events
     if (forceLatchEvent || (self->lastScaledClockPhase - scaledClockPhase > 0.5))
@@ -319,6 +306,20 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
         if (forceLatchEvent || !(ins->latchModulationToDownbeat && self->scaledBeatCounter != 0))
         {
             _MS_handleModulationLatch(self, ins, outs);
+        }
+    }
+
+    if (ins->resetBeatCount) {
+        if (rootClockPhase < 0.5) {
+            // Need to add a little bit of complex logic here, since we're basically saying that
+            // the last beat event _should_ have been a downbeat. We can't have known that a
+            // reset event was coming, so we need to handle downbeat latching now, on the reset
+            forceLatchEvent = true;
+            self->beatCounter = 0;
+            self->scaledBeatCounter = 0;
+        } else {
+            self->beatCounter = self->tempoDivide - 1;
+            self->scaledBeatCounter = self->beatsPerMeasure - 1;
         }
     }
 
