@@ -284,6 +284,17 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     // Potentially enter a "modulation pending" state
     _MS_handleModulation(self, ins);
 
+    // -- Handle an input resetBeatCount
+    if (ins->resetBeatCount) {
+        if (rootClockPhase < 0.5) {
+            self->beatCounter = 0;
+            self->scaledBeatCounter = 0;
+        } else {
+            self->beatCounter = self->tempoDivide - 1;
+            self->scaledBeatCounter = self->beatsPerMeasure - 1;
+        }
+    }
+
     // Latch to beat events
     if (self->lastScaledClockPhase - scaledClockPhase > 0.5)
     {
@@ -309,17 +320,6 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     if (!ins->invert)
     {
         self->invertNeedsReset = false;
-    }
-
-    // -- Handle an input resetBeatCount
-    if (ins->resetBeatCount) {
-        if (rootClockPhase < 0.5) {
-            self->beatCounter = 0;
-            self->scaledBeatCounter = 0;
-        } else {
-            self->beatCounter = self->tempoDivide - 1;
-            self->scaledBeatCounter = self->beatsPerMeasure - 1;
-        }
     }
 
     // Calculate downbeat
