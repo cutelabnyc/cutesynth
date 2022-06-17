@@ -285,8 +285,13 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     _MS_handleModulation(self, ins);
 
     // -- Handle an input resetBeatCount
+    bool forceLatchEvent = 0;
     if (ins->resetBeatCount) {
         if (rootClockPhase < 0.5) {
+            // Need to add a little bit of complex logic here, since we're basically saying that
+            // the last beat event _should_ have been a downbeat. We can't have known that a
+            // reset event was coming, so we need to handle downbeat latching now, on the reset
+            forceLatchEvent = true;
             self->beatCounter = 0;
             self->scaledBeatCounter = 0;
         } else {
@@ -296,22 +301,22 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     }
 
     // Latch to beat events
-    if (self->lastScaledClockPhase - scaledClockPhase > 0.5)
+    if (forceLatchEvent || (self->lastScaledClockPhase - scaledClockPhase > 0.5))
     {
         self->scaledBeatCounter = (self->scaledBeatCounter + 1) % self->beatsPerMeasure;
 
         // Handle changes
-        if (!(ins->latchBeatChangesToDownbeat && self->scaledBeatCounter != 0))
+        if (forceLatchEvent || !(ins->latchBeatChangesToDownbeat && self->scaledBeatCounter != 0))
         {
             _MS_handleLatchBeats(self, ins);
         }
-        if (!(ins->latchDivChangesToDownbeat && self->scaledBeatCounter != 0))
+        if (forceLatchEvent || !(ins->latchDivChangesToDownbeat && self->scaledBeatCounter != 0))
         {
             _MS_handleLatchDivs(self, ins);
         }
 
         // Then handle modulation changes
-        if (!(ins->latchModulationToDownbeat && self->scaledBeatCounter != 0))
+        if (forceLatchEvent || !(ins->latchModulationToDownbeat && self->scaledBeatCounter != 0))
         {
             _MS_handleModulationLatch(self, ins, outs);
         }
