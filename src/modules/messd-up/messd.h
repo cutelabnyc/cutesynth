@@ -34,6 +34,7 @@ typedef struct messd
     uint8_t lastClock;
     float measuredPeriod;
     float lastRootClockPhase;
+    float rootClockPhaseOffset;
     float lastScaledClockPhase;
     float measuredTempo;
     uint8_t beatCounter;

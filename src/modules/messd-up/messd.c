@@ -12,6 +12,7 @@ void MS_init(messd_t *self)
     self->beatsPerMeasure = 1;
     self->subdivisionsPerMeasure = 0;
     self->lastRootClockPhase = 1;
+    self->rootClockPhaseOffset = 0.0f;
     self->lastScaledClockPhase = 1;
     self->lastModulationSwitch = false;
     self->lastModulationSignal = false;
@@ -127,6 +128,7 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
             self->tempoDivide = 1;
             self->previousTempoMultiply = 1;
             self->previousTempoDivide = 1;
+            self->rootClockPhaseOffset = 0.0;
             outs->eom = true;
         } else if (!self->inRoundTripModulation) {
             if (ins->isRoundTrip)
@@ -167,12 +169,14 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
 
             // Set subdivisions equal to beats upon metric modulation
             ins->subdivisionsPerMeasure = self->beatsPerMeasure;
+            self->rootClockPhaseOffset = self->lastRootClockPhase - self->lastScaledClockPhase;
             outs->eom = true;
         } else {
             self->tempoMultiply = self->previousTempoMultiply;
             self->tempoDivide = self->previousTempoDivide;
             self->subdivisionsPerMeasure = self->previousSubdivisionsPerMeasure;
             ins->subdivisionsPerMeasure = self->subdivisionsPerMeasure;
+            self->rootClockPhaseOffset = self->lastRootClockPhase - self->lastScaledClockPhase;
             outs->eom = true;
             self->inRoundTripModulation = false;
         }
@@ -185,6 +189,7 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
         self->tempoDivide = self->previousTempoDivide;
         self->subdivisionsPerMeasure = self->previousSubdivisionsPerMeasure;
         ins->subdivisionsPerMeasure = self->subdivisionsPerMeasure;
+        self->rootClockPhaseOffset = self->lastRootClockPhase - self->lastScaledClockPhase;
         outs->eom = true;
         self->inRoundTripModulation = false;
     }
@@ -272,7 +277,7 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     self->lastRootClockPhase = rootClockPhase;
 
     // Multiply the clock to get the final phase
-    scaledClockPhase = rootClockPhase + self->beatCounter;
+    scaledClockPhase = fmod(rootClockPhase + (1.0f - self->rootClockPhaseOffset), 1.0f) + self->beatCounter;
     scaledClockPhase *= self->tempoMultiply;
     scaledClockPhase /= self->tempoDivide;
     scaledClockPhase = fmod(scaledClockPhase, 1.0f);
