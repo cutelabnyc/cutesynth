@@ -119,6 +119,9 @@ static void _MS_handleModulation(messd_t *self, messd_ins_t *ins)
 
 static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
 {
+    float nextRootClockPhaseOffset = fmod(self->lastRootClockPhase + (1.0f - self->rootClockPhaseOffset), 1.0f);
+    nextRootClockPhaseOffset = fmod(nextRootClockPhaseOffset - self->lastScaledClockPhase + 1.0f, 1.0f);
+
     if (self->modulationPending)
     {
         if (self->resetPending) {
@@ -169,14 +172,14 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
 
             // Set subdivisions equal to beats upon metric modulation
             ins->subdivisionsPerMeasure = self->beatsPerMeasure;
-            self->rootClockPhaseOffset = fmod(self->lastRootClockPhase - self->lastScaledClockPhase + self->rootClockPhaseOffset, 1.0f);
+            self->rootClockPhaseOffset = nextRootClockPhaseOffset;
             outs->eom = true;
         } else {
             self->tempoMultiply = self->previousTempoMultiply;
             self->tempoDivide = self->previousTempoDivide;
             self->subdivisionsPerMeasure = self->previousSubdivisionsPerMeasure;
             ins->subdivisionsPerMeasure = self->subdivisionsPerMeasure;
-            self->rootClockPhaseOffset = fmod(self->lastRootClockPhase - self->lastScaledClockPhase + self->rootClockPhaseOffset, 1.0f);
+            self->rootClockPhaseOffset = nextRootClockPhaseOffset;
             outs->eom = true;
             self->inRoundTripModulation = false;
         }
@@ -189,7 +192,7 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
         self->tempoDivide = self->previousTempoDivide;
         self->subdivisionsPerMeasure = self->previousSubdivisionsPerMeasure;
         ins->subdivisionsPerMeasure = self->subdivisionsPerMeasure;
-        self->rootClockPhaseOffset = fmod(self->lastRootClockPhase - self->lastScaledClockPhase + self->rootClockPhaseOffset, 1.0f);
+        self->rootClockPhaseOffset = nextRootClockPhaseOffset;
         outs->eom = true;
         self->inRoundTripModulation = false;
     }
