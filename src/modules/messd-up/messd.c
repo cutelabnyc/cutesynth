@@ -169,14 +169,14 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
 
             // Set subdivisions equal to beats upon metric modulation
             ins->subdivisionsPerMeasure = self->beatsPerMeasure;
-            self->rootClockPhaseOffset = self->lastRootClockPhase - self->lastScaledClockPhase;
+            self->rootClockPhaseOffset = fmod(self->lastRootClockPhase - self->lastScaledClockPhase + self->rootClockPhaseOffset, 1.0f);
             outs->eom = true;
         } else {
             self->tempoMultiply = self->previousTempoMultiply;
             self->tempoDivide = self->previousTempoDivide;
             self->subdivisionsPerMeasure = self->previousSubdivisionsPerMeasure;
             ins->subdivisionsPerMeasure = self->subdivisionsPerMeasure;
-            self->rootClockPhaseOffset = self->lastRootClockPhase - self->lastScaledClockPhase;
+            self->rootClockPhaseOffset = fmod(self->lastRootClockPhase - self->lastScaledClockPhase + self->rootClockPhaseOffset, 1.0f);
             outs->eom = true;
             self->inRoundTripModulation = false;
         }
@@ -189,7 +189,7 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
         self->tempoDivide = self->previousTempoDivide;
         self->subdivisionsPerMeasure = self->previousSubdivisionsPerMeasure;
         ins->subdivisionsPerMeasure = self->subdivisionsPerMeasure;
-        self->rootClockPhaseOffset = self->lastRootClockPhase - self->lastScaledClockPhase;
+        self->rootClockPhaseOffset = fmod(self->lastRootClockPhase - self->lastScaledClockPhase + self->rootClockPhaseOffset, 1.0f);
         outs->eom = true;
         self->inRoundTripModulation = false;
     }
