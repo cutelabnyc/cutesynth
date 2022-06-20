@@ -307,6 +307,11 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
         }
     }
 
+    // Calculate downbeat and measure phase
+    measurePhase = scaledClockPhase + self->scaledBeatCounter;
+    measurePhase /= self->beatsPerMeasure;
+    outs->downbeat = measurePhase < (ins->pulseWidth / ((float) self->beatsPerMeasure));
+
     if (latchEvent) {
         // Handle changes
         if (!(ins->latchBeatChangesToDownbeat && self->scaledBeatCounter != 0))
@@ -329,11 +334,6 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     {
         self->invertNeedsReset = false;
     }
-
-    // Calculate downbeat
-    measurePhase = scaledClockPhase + self->scaledBeatCounter;
-    measurePhase /= self->beatsPerMeasure;
-    outs->downbeat = measurePhase < (ins->pulseWidth / ((float) self->beatsPerMeasure));
 
     // Calculate subdivisions
     subdivision = fmod(measurePhase * self->subdivisionsPerMeasure, 1.0f);
