@@ -296,6 +296,7 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
         self->scaledBeatCounter = (self->scaledBeatCounter + 1) % self->beatsPerMeasure;
         latchEvent = true;
     }
+    self->lastScaledClockPhase = scaledClockPhase;
 
     // -- Handle an input resetBeatCount
     if (ins->resetBeatCount) {
@@ -401,6 +402,4 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     outs->modulationPending = self->modulationPending || (!ins->isRoundTrip && self->inRoundTripModulation);
     outs->resetPending = self->resetPending;
     outs->inRoundTripModulation = self->inRoundTripModulation;
-
-    self->lastScaledClockPhase = scaledClockPhase;
 }
