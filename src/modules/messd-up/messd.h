@@ -34,10 +34,24 @@ typedef struct messd
     uint8_t lastClock;
     float measuredPeriod;
     float lastRootClockPhase;
+    uint8_t rootClockMeasureOffset;
     float rootClockPhaseOffset;
     float lastScaledClockPhase;
     float measuredTempo;
     uint8_t beatCounter;
+
+    // Stuff needed for round-trip mode
+    uint16_t homeTempoMultiply;
+    uint16_t homeTempoDivide;
+    uint8_t homeSubdivisionsPerMeasure;
+    uint8_t homeBeatsPerMeasure;
+
+    // Stuff needed for latch mode
+    uint32_t rootBeatCounter;
+    uint16_t countdown;
+    uint16_t memoizedCountdownMax;
+    uint8_t memoizedBeatsPerMeasure;
+    bool isLatching;
 
 #ifdef TRACK_INPUT_CLOCK_PERIOD
     float msSinceLastLeadingEdge;
@@ -55,9 +69,6 @@ typedef struct messd
 
     uint16_t tempoMultiply;
     uint16_t tempoDivide;
-    uint16_t previousTempoMultiply;
-    uint16_t previousTempoDivide;
-    uint8_t previousSubdivisionsPerMeasure;
 } messd_t;
 
 typedef struct messd_ins
@@ -103,6 +114,7 @@ typedef struct messd_outs
     bool resetPending; // High when the next modulation is resetting
     bool inRoundTripModulation; // High when a round trip modulation is active
     uint8_t subdivisions; // The number of subdivisions in use, after modulation
+    uint16_t countdown; // The number of measures remaining in the countdown until the pending modulation will be triggered
 	float scaledTempo; // Output tempo after scaling
     float measuredTempo; // Measured tempo of the external clock
 } messd_outs_t;

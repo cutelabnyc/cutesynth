@@ -12,6 +12,7 @@ void MS_init(messd_t *self)
     self->beatsPerMeasure = 1;
     self->subdivisionsPerMeasure = 0;
     self->lastRootClockPhase = 1;
+    self->rootClockMeasureOffset = 0;
     self->rootClockPhaseOffset = 0.0f;
     self->lastScaledClockPhase = 1;
     self->lastModulationSwitch = false;
@@ -28,9 +29,14 @@ void MS_init(messd_t *self)
     self->scaledBeatCounter = 0;
     self->tempoMultiply = 1;
     self->tempoDivide = 1;
-    self->previousTempoMultiply = 1;
-    self->previousTempoDivide = 1;
-    self->previousSubdivisionsPerMeasure = 2;
+    self->homeTempoMultiply = 1;
+    self->homeTempoDivide = 1;
+    self->homeSubdivisionsPerMeasure = 2;
+    self->homeBeatsPerMeasure = 2;
+
+    // Latching
+    self->isLatching = true;
+    self->memoizedBeatsPerMeasure = 0;
 
     self->invertNeedsReset = false;
     self->modulationPending = false;
@@ -56,6 +62,14 @@ static void reduceFraction(uint16_t n_in, uint16_t d_in, uint16_t *n_out, uint16
             counter--;
         }
     }
+}
+
+static uint16_t leastCommonMultiple(uint16_t x, uint16_t y)
+{
+    uint16_t tmpx = x;
+    uint16_t tmpy = y;
+    reduceFraction(x, y, &tmpx, &tmpy);
+    return x * y;
 }
 
 static void _MS_setModulationPending(messd_t *self, bool pending)
@@ -117,82 +131,91 @@ static void _MS_handleModulation(messd_t *self, messd_ins_t *ins)
     self->lastModulationSwitch = ins->modulationSwitch;
 }
 
+static void _MS_startCountdownMemoized(messd_t *self, messd_ins_t *ins)
+{
+    if (self->memoizedBeatsPerMeasure != self->beatsPerMeasure) {
+        self->memoizedCountdownMax = leastCommonMultiple(self->tempoDivide, self->beatsPerMeasure);
+        self->countdown = self->memoizedCountdownMax - (self->rootBeatCounter % self->memoizedCountdownMax);
+        self->memoizedBeatsPerMeasure = self->beatsPerMeasure;
+    }
+}
+
+static void _MS_handleModulationLatchingMode(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
+{
+    if (self->resetPending) {
+        self->inRoundTripModulation = false;
+        self->modulationPending = false;
+        self->tempoMultiply = 1;
+        self->tempoDivide = 1;
+        self->homeTempoMultiply = 1;
+        self->homeTempoDivide = 1;
+        self->homeBeatsPerMeasure = 2;
+        self->homeSubdivisionsPerMeasure = 2;
+        self->rootClockMeasureOffset = 0;
+        self->rootClockPhaseOffset = 0.0;
+        outs->eom = true;
+    } else if (!self->inRoundTripModulation) {
+        if (ins->isRoundTrip)
+        {
+            self->homeTempoMultiply = self->tempoMultiply;
+            self->homeTempoDivide = self->tempoDivide;
+            self->homeSubdivisionsPerMeasure = self->subdivisionsPerMeasure;
+            self->homeBeatsPerMeasure = self->beatsPerMeasure;
+            self->inRoundTripModulation = true;
+        } else {
+            self->inRoundTripModulation = false;
+        }
+
+        self->tempoMultiply *= ins->subdivisionsPerMeasure;
+        self->tempoDivide *= ins->beatsPerMeasure;
+        reduceFraction(self->tempoMultiply, self->tempoDivide, &self->tempoMultiply, &self->tempoDivide);
+        self->subdivisionsPerMeasure = self->beatsPerMeasure;
+
+        // Set subdivisions equal to beats upon metric modulation
+        ins->subdivisionsPerMeasure = self->beatsPerMeasure;
+
+        // Need all this for latching
+        self->rootBeatCounter = 0;
+        _MS_startCountdownMemoized(self, ins);
+
+        outs->eom = true;
+    } else {
+        self->tempoMultiply = self->homeTempoMultiply;
+        self->tempoDivide = self->homeTempoDivide;
+        self->subdivisionsPerMeasure = self->homeSubdivisionsPerMeasure;
+        self->beatsPerMeasure = self->homeBeatsPerMeasure;
+        ins->beatsPerMeasure = self->beatsPerMeasure;
+        ins->subdivisionsPerMeasure = self->subdivisionsPerMeasure;
+        outs->eom = true;
+        self->inRoundTripModulation = false;
+    }
+}
+
+static void _MS_handleModulationFreeMode(self, ins, outs)
+{
+
+}
+
 static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
 {
-    float nextRootClockPhaseOffset = fmod(self->lastRootClockPhase + (1.0f - self->rootClockPhaseOffset), 1.0f);
-    nextRootClockPhaseOffset = fmod(nextRootClockPhaseOffset - self->lastScaledClockPhase + 1.0f, 1.0f);
-
     if (self->modulationPending)
     {
-        if (self->resetPending) {
-            self->inRoundTripModulation = false;
-            self->modulationPending = false;
-            self->tempoMultiply = 1;
-            self->tempoDivide = 1;
-            self->previousTempoMultiply = 1;
-            self->previousTempoDivide = 1;
-            self->rootClockPhaseOffset = 0.0;
-            outs->eom = true;
-        } else if (!self->inRoundTripModulation) {
-            if (ins->isRoundTrip)
-            {
-                self->previousTempoMultiply = self->tempoMultiply;
-                self->previousTempoDivide = self->tempoDivide;
-                self->previousSubdivisionsPerMeasure = self->subdivisionsPerMeasure;
-                self->inRoundTripModulation = true;
-            } else {
-                self->inRoundTripModulation = false;
-            }
-
-            self->tempoMultiply *= ins->subdivisionsPerMeasure;
-            self->tempoDivide *= ins->beatsPerMeasure;
-            reduceFraction(self->tempoMultiply, self->tempoDivide, &self->tempoMultiply, &self->tempoDivide);
-
-            while (self->tempoMultiply > 1000 && self->tempoDivide >= 2) {
-                self->tempoMultiply = self->tempoMultiply >> 1;
-                self->tempoDivide = self->tempoDivide >> 1;
-            }
-
-            while (self->tempoDivide > 1000 && self->tempoMultiply >= 2) {
-                self->tempoMultiply = self->tempoMultiply >> 1;
-                self->tempoDivide = self->tempoDivide >> 1;
-            }
-
-            float wrappedTempo = self->measuredTempo * ((float) self->tempoMultiply) / ((float) self->tempoDivide);
-
-            if (wrappedTempo > MAX_TEMPO || wrappedTempo < MIN_TEMPO) {
-                while (wrappedTempo > MAX_TEMPO) wrappedTempo /= 2.0f;
-                while (wrappedTempo < MIN_TEMPO) wrappedTempo *= 2.0f;
-                self->tempoDivide = floorf(self->measuredTempo);
-                self->tempoMultiply = floorf(wrappedTempo);
-                reduceFraction(self->tempoMultiply, self->tempoDivide, &self->tempoMultiply, &self->tempoDivide);
-            }
-
-            self->subdivisionsPerMeasure = self->beatsPerMeasure;
-
-            // Set subdivisions equal to beats upon metric modulation
-            ins->subdivisionsPerMeasure = self->beatsPerMeasure;
-            self->rootClockPhaseOffset = nextRootClockPhaseOffset;
-            outs->eom = true;
+        if (self->isLatching) {
+            _MS_handleModulationLatchingMode(self, ins, outs);
         } else {
-            self->tempoMultiply = self->previousTempoMultiply;
-            self->tempoDivide = self->previousTempoDivide;
-            self->subdivisionsPerMeasure = self->previousSubdivisionsPerMeasure;
-            ins->subdivisionsPerMeasure = self->subdivisionsPerMeasure;
-            self->rootClockPhaseOffset = nextRootClockPhaseOffset;
-            outs->eom = true;
-            self->inRoundTripModulation = false;
+            _MS_handleModulationFreeMode(self, ins, outs);
         }
     }
 
     // Special case--force us to leave a round trip modulation if we're no longer in round trip
     // mode, but we're in a round trip modoulation
     if (self->inRoundTripModulation && !ins->isRoundTrip) {
-        self->tempoMultiply = self->previousTempoMultiply;
-        self->tempoDivide = self->previousTempoDivide;
-        self->subdivisionsPerMeasure = self->previousSubdivisionsPerMeasure;
+        self->tempoMultiply = self->homeTempoMultiply;
+        self->tempoDivide = self->homeTempoDivide;
+        self->subdivisionsPerMeasure = self->homeSubdivisionsPerMeasure;
+        self->beatsPerMeasure = self->homeBeatsPerMeasure;
+        ins->beatsPerMeasure = self->beatsPerMeasure;
         ins->subdivisionsPerMeasure = self->subdivisionsPerMeasure;
-        self->rootClockPhaseOffset = nextRootClockPhaseOffset;
         outs->eom = true;
         self->inRoundTripModulation = false;
     }
@@ -220,6 +243,9 @@ static void _MS_handleLatchBeats(messd_t *self, messd_ins_t *ins)
 {
     // Update beats
     self->beatsPerMeasure = ins->beatsPerMeasure;
+
+    // This will only update the countdown if the beatsPerMeasure have changed
+    _MS_startCountdownMemoized(self, ins);
 
     _MS_handleLatchHelper(self, ins);
 }
@@ -276,6 +302,7 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     // Count beats on the clock
     if (self->lastRootClockPhase - rootClockPhase > 0.5) {
         self->beatCounter = (self->beatCounter + 1) % self->tempoDivide;
+        self->rootBeatCounter++; // this counts up forever;
     }
     self->lastRootClockPhase = rootClockPhase;
 
@@ -333,7 +360,8 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
         }
 
         // Then handle modulation changes
-        if (!(ins->latchModulationToDownbeat && self->scaledBeatCounter != 0))
+        bool shouldModulate = self->countdown == 0;
+        if (shouldModulate)
         {
             _MS_handleModulationLatch(self, ins, outs);
         }
@@ -405,4 +433,6 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     outs->modulationPending = self->modulationPending || (!ins->isRoundTrip && self->inRoundTripModulation);
     outs->resetPending = self->resetPending;
     outs->inRoundTripModulation = self->inRoundTripModulation;
+
+    outs->countdown = self->countdown * self->tempoMultiply / (self->tempoDivide * self->beatsPerMeasure);
 }
