@@ -190,7 +190,8 @@ static void _MS_handleLatchBeats(messd_t *self, messd_ins_t *ins)
     self->beatsPerMeasure = ins->beatsPerMeasure;
 
     // This will only update the countdown if the beatsPerMeasure have changed
-    _MS_startCountdownMemoized(self, ins);
+    // TODO: handle this
+    // _MS_startCountdownMemoized(self, ins);
 }
 
 static void _MS_handleLatchDivs(messd_t *self, messd_ins_t *ins)
@@ -290,7 +291,8 @@ static inline void _MS_process_updateRootClockPhase(messd_t *self, messd_ins_t *
     if (self->rootClockPhase - nextRootClockPhase > 0.5) {
         self->rootBeatsSinceModulation++;
         self->rootBeatCounter = (self->rootBeatCounter + 1) % self->tempoDivide;
-        self->countdown = self->countdown == 0 ? self->memoizedCountdownMax : self->countdown - 1;
+        if (self->countdown == 0) self->countdown = self->memoizedCountdownMax;
+        self->countdown--;
     }
     self->rootClockPhase = nextRootClockPhase;
 }
@@ -329,7 +331,10 @@ static inline void _MS_process_triggerLatchedChanges(messd_t *self, messd_ins_t 
     }
 
     // Then handle modulation changes
-    bool shouldModulate = self->isLatching ? self->countdown == 0 : true;
+    // TODO: make this work by handling free mode
+    bool shouldModulate = self->inRoundTripModulation && self->countdown == 0
+        ||
+        !self->inRoundTripModulation && self->scaledBeatCounter == 0;
     if (shouldModulate && self->modulationPending)
     {
         _MS_handleModulationLatch(self, ins, outs);
