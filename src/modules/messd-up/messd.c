@@ -90,7 +90,7 @@ static void _MS_startCountdownMemoized(messd_t *self, messd_ins_t *ins)
 {
     if (self->memoizedBeatsPerMeasure != self->beatsPerMeasure) {
         self->memoizedCountdownMax = self->tempoDivide * self->beatsPerMeasure;
-        self->countdown = self->memoizedCountdownMax - (self->rootBeatsSinceModulation % self->memoizedCountdownMax);
+        self->countdown = (self->memoizedCountdownMax - 1) - (self->rootBeatsSinceModulation % self->memoizedCountdownMax);
         self->memoizedBeatsPerMeasure = self->beatsPerMeasure;
     }
 }
@@ -290,8 +290,7 @@ static inline void _MS_process_updateRootClockPhase(messd_t *self, messd_ins_t *
     if (self->rootClockPhase - nextRootClockPhase > 0.5) {
         self->rootBeatsSinceModulation++;
         self->rootBeatCounter = (self->rootBeatCounter + 1) % self->tempoDivide;
-        self->countdown--;
-        if (self->countdown < 0) self->countdown = self->memoizedCountdownMax;
+        self->countdown = self->countdown == 0 ? self->memoizedCountdownMax : self->countdown - 1;
     }
     self->rootClockPhase = nextRootClockPhase;
 }
