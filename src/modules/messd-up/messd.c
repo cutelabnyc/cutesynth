@@ -90,7 +90,7 @@ static void _MS_startCountdownMemoized(messd_t *self, messd_ins_t *ins)
 {
     if (self->memoizedBeatsPerMeasure != self->beatsPerMeasure) {
         self->memoizedCountdownMax = self->tempoDivide * self->beatsPerMeasure;
-        self->countdown = (self->memoizedCountdownMax - 1) - (self->rootBeatsSinceModulation % self->memoizedCountdownMax);
+        self->countdown = 0;
         self->memoizedBeatsPerMeasure = self->beatsPerMeasure;
     }
 }
