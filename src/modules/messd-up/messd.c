@@ -31,7 +31,7 @@ void MS_init(messd_t *self)
     self->countdown = 0;
     self->memoizedCountdownMax = 0;
     self->memoizedBeatsPerMeasure = 1;
-    self->isLatching = true;
+    self->isLatching = false;
 
     self->rootBeatCounter = 0;
     self->scaledBeatCounter = 0;
@@ -334,10 +334,11 @@ static inline void _MS_process_triggerLatchedChanges(messd_t *self, messd_ins_t 
     }
 
     // Then handle modulation changes
-    // TODO: make this work by handling free mode
     bool shouldModulate = self->inRoundTripModulation && self->countdown == 0
         ||
-        !self->inRoundTripModulation && self->scaledBeatCounter == 0;
+        !self->inRoundTripModulation && self->scaledBeatCounter == 0
+        ||
+        !self->isLatching;
     if (shouldModulate && self->modulationPending)
     {
         _MS_handleModulationLatch(self, ins, outs);
@@ -419,6 +420,9 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     float subdivision = 0;
     float phasor = 0;
     outs->eom = false;
+
+    // TODO: Handle reset if any of round/one-way or free/latch changes
+    self->isLatching = ins->latchModulationToDownbeat;
 
     // Potentially enter a "modulation pending" state
     _MS_processModulationInput(self, ins);
