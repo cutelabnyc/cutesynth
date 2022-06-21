@@ -26,29 +26,35 @@
   */
 typedef struct messd
 {
-    phasor_t internalClock;
+    phasor_t internalClock; // This is a phasor (0-1 ramp) synchronized to the input clock
+    uint8_t lastClock; // Previous value of the input clock
+    float measuredPeriod; // Recorded time between two input clock leading edges
+    float measuredTempo; // Time between two input clocks as beats per minute
 
-    uint8_t beatsPerMeasure;
-    uint8_t subdivisionsPerMeasure;
+    uint8_t beatsPerMeasure; // Current number of beats to a measure
+    uint8_t subdivisionsPerMeasure; // Current number of subdivisions to a measure
+    uint16_t tempoMultiply; // Together with tempoDivide, defines the duration ratio
+                            // of one stretched beat to one root clock beat.
+    uint16_t tempoDivide;
 
-    uint8_t lastClock;
-    float measuredPeriod;
-    float lastRootClockPhase;
-    uint8_t rootClockMeasureOffset;
-    float rootClockPhaseOffset;
-    float lastScaledClockPhase;
-    float measuredTempo;
-    uint8_t beatCounter;
+    float rootClockPhase; // Previous phase of the internal phasor
+    float scaledClockPhase; // Previous phase of the internal phasor after stretching
+    float rootClockPhaseOffset; // Offset in <unstretched-beats>.<phase> of the internal clock
+                                // to maintain alignent in free mode
 
     // Stuff needed for round-trip mode
+    // These values are recorded whenever the module enters a round-trip modulation
     uint16_t homeTempoMultiply;
     uint16_t homeTempoDivide;
     uint8_t homeSubdivisionsPerMeasure;
     uint8_t homeBeatsPerMeasure;
 
     // Stuff needed for latch mode
-    uint32_t rootBeatCounter;
-    uint16_t countdown;
+    uint32_t rootBeatsSinceModulation;  // Counts up from 0 the number of root clock events since the last
+                                        // modulation. Needed to calculate the number of root clock events
+                                        // until the root clock and stretched clock are in phase on a
+                                        // stretched downbeat
+    uint16_t countdown;                 // Root clock events remaining until the clocks are in sync
     uint16_t memoizedCountdownMax;
     uint8_t memoizedBeatsPerMeasure;
     bool isLatching;
@@ -57,18 +63,16 @@ typedef struct messd
     float msSinceLastLeadingEdge;
 #endif
 
-    uint8_t scaledBeatCounter;
+    uint8_t rootBeatCounter;    // Beat count for the input clock
+    uint8_t scaledBeatCounter;  // Beat count for the scaled clock
 
-    bool lastModulationSignal;
-    bool lastModulationSwitch;
+    bool lastModulationSignal;  // Needed to detect leading edges on the modulation signal
+    bool lastModulationSwitch;  // Needed to detect leading edges on the modulation switch
     bool inRoundTripModulation;
     bool invertNeedsReset;
     bool modulationPending;
     bool resetPending;
     bool modulateOnEdgeEnabled;
-
-    uint16_t tempoMultiply;
-    uint16_t tempoDivide;
 } messd_t;
 
 typedef struct messd_ins
