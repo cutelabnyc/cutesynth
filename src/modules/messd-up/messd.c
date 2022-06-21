@@ -292,7 +292,7 @@ static inline void _MS_process_updateRootClockPhase(messd_t *self, messd_ins_t *
         self->rootBeatsSinceModulation++;
         self->rootBeatCounter = (self->rootBeatCounter + 1) % self->tempoDivide;
         if (self->countdown == 0) self->countdown = self->memoizedCountdownMax;
-        self->countdown--;
+        if (self->countdown != 0) self->countdown--;
     }
     self->rootClockPhase = nextRootClockPhase;
 }
