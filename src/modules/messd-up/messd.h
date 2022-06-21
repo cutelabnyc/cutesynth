@@ -69,7 +69,6 @@ typedef struct messd
     bool lastModulationSignal;  // Needed to detect leading edges on the modulation signal
     bool lastModulationSwitch;  // Needed to detect leading edges on the modulation switch
     bool inRoundTripModulation;
-    bool invertNeedsReset;
     bool modulationPending;
     bool resetPending;
     bool modulateOnEdgeEnabled;
