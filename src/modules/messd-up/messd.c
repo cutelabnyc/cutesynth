@@ -164,6 +164,15 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
         self->beatsPerMeasure = self->homeBeatsPerMeasure;
         ins->beatsPerMeasure = self->beatsPerMeasure;
         ins->subdivisionsPerMeasure = self->subdivisionsPerMeasure;
+
+        if (!self->isLatching) {
+            // TODO: figure out a way to do this that doesn't involve duplication
+            float currentBeatsInRootTimeSignature = ((float) self->scaledBeatCounter + self->scaledClockPhase) * self->tempoDivide / self->tempoMultiply;
+            currentBeatsInRootTimeSignature = fmod(currentBeatsInRootTimeSignature, self->beatsPerMeasure);
+            self->rootClockPhaseOffset = currentBeatsInRootTimeSignature - (self->rootClockPhase + self->rootBeatCounter);
+            if (self->rootClockPhaseOffset < 0) self->rootClockPhaseOffset += self->beatsPerMeasure;
+        }
+
         outs->eom = true;
         self->inRoundTripModulation = false;
         self->memoizedBeatsPerMeasure = 0;
