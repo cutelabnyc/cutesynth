@@ -166,6 +166,9 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
         ins->subdivisionsPerMeasure = self->subdivisionsPerMeasure;
         outs->eom = true;
         self->inRoundTripModulation = false;
+        self->memoizedBeatsPerMeasure = 0;
+        self->countdown = 0;
+        self->memoizedCountdownMax = 0;
         _MS_setModulationPending(self, false);
     }
 
