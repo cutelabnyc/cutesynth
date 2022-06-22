@@ -149,13 +149,13 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
             self->tempoMultiply = self->tempoMultiply >> 1;
         }
 
-        // If you're being asked to multiply by more than 50, multiply by half as much
-        while (self->tempoMultiply / self->tempoDivide > 50) {
+        // If you would bring the tempo over 1000.0, multiply by half as much
+        while (self->measuredTempo * self->tempoMultiply / self->tempoDivide > 1000.0) {
             self->tempoMultiply = self->tempoMultiply >> 1;
         }
 
-        // If you're being asked to divide my more than 50, divide by half as much
-        while (self->tempoDivide / self->tempoMultiply > 50) {
+        // If you would bring the tempo under 1.0, divide by half as much
+        while (self->measuredTempo * self->tempoMultiply / self->tempoDivide < 1.0) {
             self->tempoDivide = self->tempoDivide >> 1;
         }
 
