@@ -158,27 +158,27 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
         _MS_setModulationPending(self, false);
         outs->eom = true;
     } else {
-        self->tempoMultiply = self->homeTempoMultiply;
-        self->tempoDivide = self->homeTempoDivide;
-        self->subdivisionsPerMeasure = self->homeSubdivisionsPerMeasure;
-        self->beatsPerMeasure = self->homeBeatsPerMeasure;
-        ins->beatsPerMeasure = self->beatsPerMeasure;
-        ins->subdivisionsPerMeasure = self->subdivisionsPerMeasure;
+        // self->tempoMultiply = self->homeTempoMultiply;
+        // self->tempoDivide = self->homeTempoDivide;
+        // self->subdivisionsPerMeasure = self->homeSubdivisionsPerMeasure;
+        // self->beatsPerMeasure = self->homeBeatsPerMeasure;
+        // ins->beatsPerMeasure = self->beatsPerMeasure;
+        // ins->subdivisionsPerMeasure = self->subdivisionsPerMeasure;
 
-        if (!self->isLatching) {
-            // TODO: figure out a way to do this that doesn't involve duplication
-            float currentBeatsInRootTimeSignature = ((float) self->scaledBeatCounter + self->scaledClockPhase) * self->tempoDivide / self->tempoMultiply;
-            currentBeatsInRootTimeSignature = fmod(currentBeatsInRootTimeSignature, self->tempoDivide);
-            self->rootClockPhaseOffset = currentBeatsInRootTimeSignature - (self->rootClockPhase + self->rootBeatCounter);
-            if (self->rootClockPhaseOffset < 0) self->rootClockPhaseOffset += self->tempoDivide;
-        }
+        // if (!self->isLatching) {
+        //     // TODO: figure out a way to do this that doesn't involve duplication
+        //     float currentBeatsInRootTimeSignature = ((float) self->scaledBeatCounter + self->scaledClockPhase) * self->tempoDivide / self->tempoMultiply;
+        //     currentBeatsInRootTimeSignature = fmod(currentBeatsInRootTimeSignature, self->tempoDivide);
+        //     self->rootClockPhaseOffset = currentBeatsInRootTimeSignature - (self->rootClockPhase + self->rootBeatCounter);
+        //     if (self->rootClockPhaseOffset < 0) self->rootClockPhaseOffset += self->tempoDivide;
+        // }
 
-        outs->eom = true;
-        self->inRoundTripModulation = false;
-        self->memoizedBeatsPerMeasure = 0;
-        self->countdown = 0;
-        self->memoizedCountdownMax = 0;
-        _MS_setModulationPending(self, false);
+        // outs->eom = true;
+        // self->inRoundTripModulation = false;
+        // self->memoizedBeatsPerMeasure = 0;
+        // self->countdown = 0;
+        // self->memoizedCountdownMax = 0;
+        // _MS_setModulationPending(self, false);
     }
 
     // Special case--force us to leave a round trip modulation if we're no longer in round trip
