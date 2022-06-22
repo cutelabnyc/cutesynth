@@ -142,7 +142,23 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
         reduceFraction(self->tempoMultiply, div, &self->tempoMultiply, &div);
         self->tempoMultiply *= mul;
         self->tempoDivide *= div;
-        // reduceFraction(self->tempoMultiply, self->tempoDivide, &self->tempoMultiply, &self->tempoDivide);
+
+        // If the factors are both really big, then just scale them down, losing a bit of precision
+        while (self->tempoDivide > 1000 && self->tempoMultiply > 1000) {
+            self->tempoDivide = self->tempoDivide >> 1;
+            self->tempoMultiply = self->tempoMultiply >> 1;
+        }
+
+        // If you're being asked to multiply by more than 50, multiply by half as much
+        while (self->tempoMultiply / self->tempoDivide > 50) {
+            self->tempoMultiply = self->tempoMultiply >> 1;
+        }
+
+        // If you're being asked to divide my more than 50, divide by half as much
+        while (self->tempoDivide / self->tempoMultiply > 50) {
+            self->tempoDivide = self->tempoDivide >> 1;
+        }
+
         self->subdivisionsPerMeasure = self->beatsPerMeasure;
         self->rootBeatsSinceModulation = 0;
         self->rootBeatCounter %= self->tempoDivide;
@@ -153,8 +169,6 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
         if (self->isLatching) {
             _MS_startCountdownMemoized(self, ins);
         } else {
-
-            // TODO: handle multiple modulations... though maybe it's already working
             float currentBeatsInRootTimeSignature = ((float) self->scaledBeatCounter + self->scaledClockPhase) * self->tempoDivide / self->tempoMultiply;
             currentBeatsInRootTimeSignature = fmod(currentBeatsInRootTimeSignature, self->tempoDivide);
             self->rootClockPhaseOffset = currentBeatsInRootTimeSignature - (self->rootClockPhase + self->rootBeatCounter);
