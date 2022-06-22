@@ -150,9 +150,9 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
 
             // TODO: handle multiple modulations... though maybe it's already working
             float currentBeatsInRootTimeSignature = ((float) self->scaledBeatCounter + self->scaledClockPhase) * self->tempoDivide / self->tempoMultiply;
-            currentBeatsInRootTimeSignature = fmod(currentBeatsInRootTimeSignature, self->beatsPerMeasure);
+            currentBeatsInRootTimeSignature = fmod(currentBeatsInRootTimeSignature, self->tempoDivide);
             self->rootClockPhaseOffset = currentBeatsInRootTimeSignature - (self->rootClockPhase + self->rootBeatCounter);
-            if (self->rootClockPhaseOffset < 0) self->rootClockPhaseOffset += self->beatsPerMeasure;
+            if (self->rootClockPhaseOffset < 0) self->rootClockPhaseOffset += self->tempoDivide;
         }
 
         _MS_setModulationPending(self, false);
@@ -168,9 +168,9 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
         if (!self->isLatching) {
             // TODO: figure out a way to do this that doesn't involve duplication
             float currentBeatsInRootTimeSignature = ((float) self->scaledBeatCounter + self->scaledClockPhase) * self->tempoDivide / self->tempoMultiply;
-            currentBeatsInRootTimeSignature = fmod(currentBeatsInRootTimeSignature, self->beatsPerMeasure);
+            currentBeatsInRootTimeSignature = fmod(currentBeatsInRootTimeSignature, self->tempoDivide);
             self->rootClockPhaseOffset = currentBeatsInRootTimeSignature - (self->rootClockPhase + self->rootBeatCounter);
-            if (self->rootClockPhaseOffset < 0) self->rootClockPhaseOffset += self->beatsPerMeasure;
+            if (self->rootClockPhaseOffset < 0) self->rootClockPhaseOffset += self->tempoDivide;
         }
 
         outs->eom = true;
