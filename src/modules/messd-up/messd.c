@@ -134,10 +134,15 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
             self->inRoundTripModulation = false;
         }
 
-
-        self->tempoMultiply *= ins->subdivisionsPerMeasure;
-        self->tempoDivide *= ins->beatsPerMeasure;
-        reduceFraction(self->tempoMultiply, self->tempoDivide, &self->tempoMultiply, &self->tempoDivide);
+        // Reduce the factors before you multiply, requiring fewer divisions
+        uint16_t mul = ins->subdivisionsPerMeasure;
+        uint16_t div = ins->beatsPerMeasure;
+        reduceFraction(mul, div, &mul, &div);
+        reduceFraction(mul, self->tempoDivide, &mul, &self->tempoDivide);
+        reduceFraction(self->tempoMultiply, div, &self->tempoMultiply, &div);
+        self->tempoMultiply *= mul;
+        self->tempoDivide *= div;
+        // reduceFraction(self->tempoMultiply, self->tempoDivide, &self->tempoMultiply, &self->tempoDivide);
         self->subdivisionsPerMeasure = self->beatsPerMeasure;
         self->rootBeatsSinceModulation = 0;
         self->rootBeatCounter %= self->tempoDivide;
