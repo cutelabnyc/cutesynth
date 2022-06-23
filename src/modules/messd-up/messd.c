@@ -33,6 +33,7 @@ void MS_init(messd_t *self)
     self->memoizedBeatsPerMeasure = 1;
     self->originalBeatCounter = 0;
     self->originalBeatsPerMeasure = 0;
+    self->nudgeFactor = 1.0;
     self->isLatching = false;
 
     self->rootBeatCounter = 0;
