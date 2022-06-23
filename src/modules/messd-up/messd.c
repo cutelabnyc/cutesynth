@@ -310,7 +310,7 @@ static inline void _MS_processModulationInput(messd_t *self, messd_ins_t *ins)
         ||
         (ins->latchModulationToDownbeat != self->lastModulationLatchSetting && self->lastModulationLatchSetting != -1))
     {
-        forceReset = true;
+        // forceReset = true;
     }
     self->lastRoundTripSetting = ins->isRoundTrip;
     self->lastModulationLatchSetting = ins->latchModulationToDownbeat;
