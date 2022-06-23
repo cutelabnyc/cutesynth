@@ -515,9 +515,6 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     float phasor = 0;
     outs->eom = false;
 
-    // TODO: Handle reset if any of round/one-way or free/latch changes
-    self->isLatching = ins->latchModulationToDownbeat;
-
     // Potentially enter a "modulation pending" state
     _MS_processModulationInput(self, ins);
     _MS_process_handleInputClock(self, ins, outs);
