@@ -35,7 +35,8 @@ void MS_init(messd_t *self)
     self->originalBeatsPerMeasure = 0;
     self->nudgeFactor = 1.0;
     self->lastPreNudgedScaledPhase = 0.0;
-    self->isLatching = false;
+    self->lastModulationLatchSetting = -1;
+    self->lastRoundTripSetting = -1;
 
     self->rootBeatCounter = 0;
     self->scaledBeatCounter = 0;
@@ -193,7 +194,7 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
         // Set subdivisions equal to beats on metric modulation
         ins->subdivisionsPerMeasure = self->beatsPerMeasure;
 
-        if (self->isLatching) {
+        if (ins->latchModulationToDownbeat) {
             if (ins->isRoundTrip) {
                 _MS_startCountdownMemoized(self, ins);
             }
@@ -216,7 +217,7 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
 
         // In round-trip/free mode, there's no need to do this phase computation, because
         // you're already guaranteed to be in phase by virtue of the countdown.
-        if (!self->isLatching) {
+        if (!ins->latchModulationToDownbeat) {
             // TODO: figure out a way to do this that doesn't involve duplication
             float currentBeatsInRootTimeSignature = ((float) self->scaledBeatCounter + self->scaledClockPhase) * self->tempoDivide / self->tempoMultiply;
             currentBeatsInRootTimeSignature = fmod(currentBeatsInRootTimeSignature, self->tempoDivide);
@@ -304,8 +305,18 @@ static inline void _MS_processModulationInput(messd_t *self, messd_ins_t *ins)
         self->modulateOnEdgeEnabled = true;
     }
 
+    bool forceReset = false;
+    if ((ins->isRoundTrip != self->lastRoundTripSetting && self->lastRoundTripSetting != -1)
+        ||
+        (ins->latchModulationToDownbeat != self->lastModulationLatchSetting && self->lastModulationLatchSetting != -1))
+    {
+        forceReset = true;
+    }
+    self->lastRoundTripSetting = ins->isRoundTrip;
+    self->lastModulationLatchSetting = ins->latchModulationToDownbeat;
+
     // Any reset
-    if (ins->reset && !self->resetPending) {
+    if ((ins->reset || forceReset) && !self->resetPending) {
         _MS_setModulationPending(self, ins, true);
         self->resetPending = true;
         self->modulateOnEdgeEnabled = false;
@@ -421,7 +432,7 @@ static inline void _MS_process_triggerLatchedChanges(messd_t *self, messd_ins_t 
         ||
         !self->inRoundTripModulation && self->scaledBeatCounter == 0
         ||
-        !self->isLatching;
+        !ins->latchModulationToDownbeat;
     if (shouldModulate && self->modulationPending)
     {
         _MS_handleModulationLatch(self, ins, outs);

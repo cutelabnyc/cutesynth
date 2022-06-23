@@ -62,7 +62,8 @@ typedef struct messd
     float nudgeFactor;                  // Factor by which to nudge the scaled clock during a pending modulation
                                         //  to guarantee that the two clocks will align on the next downbeat
     float lastPreNudgedScaledPhase;     // Needed to adjust the scaled phase by the nudge factor
-    bool isLatching;
+    uint8_t lastModulationLatchSetting;
+    uint8_t lastRoundTripSetting;
 
 #ifdef TRACK_INPUT_CLOCK_PERIOD
     float msSinceLastLeadingEdge;
