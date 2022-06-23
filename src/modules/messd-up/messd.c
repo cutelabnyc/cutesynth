@@ -375,7 +375,9 @@ static inline bool _MS_process_updateScaledClockPhase(messd_t *self, messd_ins_t
     // Okay, here's where things get interesting. Rather than simply setting the next phase,
     // we compute a delta which we can scale by the nudge factor if we so choose.
     if (self->nudgeFactor != 1.0f) {
+        nextScaledClockPhase = fmod(nextScaledClockPhase, 1.0f);
         float scaledPhaseDelta = nextScaledClockPhase - self->scaledClockPhase;
+        if (scaledPhaseDelta < 0) scaledPhaseDelta = 1.0 - scaledPhaseDelta;
         scaledPhaseDelta *= self->nudgeFactor;
         nextScaledClockPhase = self->scaledClockPhase + scaledPhaseDelta;
     }
