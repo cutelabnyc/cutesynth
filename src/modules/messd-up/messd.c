@@ -31,6 +31,8 @@ void MS_init(messd_t *self)
     self->countdown = 0;
     self->memoizedCountdownMax = 0;
     self->memoizedBeatsPerMeasure = 1;
+    self->originalBeatCounter = 0;
+    self->originalBeatsPerMeasure = 0;
     self->isLatching = false;
 
     self->rootBeatCounter = 0;
@@ -76,13 +78,29 @@ static uint16_t leastCommonMultiple(uint16_t x, uint16_t y)
     return x * y;
 }
 
-static void _MS_setModulationPending(messd_t *self, bool pending)
+// Returns the factor by which the current scaled clock must be sped up or slowed down to guarantee that
+// the two clocks will align on the next downbeat
+static void _MS_nudgeScaledClockIntoPhase(messd_t *self)
+{
+    uint8_t originalBeatsPerMeasure = self->originalBeatsPerMeasure == 0 ? self->beatsPerMeasure : self->originalBeatsPerMeasure;
+    float originalMeasurePhase = (self->originalBeatCounter + self->rootClockPhase) / originalBeatsPerMeasure;
+    float scaledMeasurePhase = (self->scaledBeatCounter + self->scaledClockPhase) / self->beatsPerMeasure;
+    float scaleFactor = (1.0f - scaledMeasurePhase) / (1.0f - originalMeasurePhase);
+    scaleFactor *= ((float) self->tempoDivide) / ((float) self->tempoMultiply);
+    self->nudgeFactor = scaleFactor;
+}
+
+static void _MS_setModulationPending(messd_t *self, messd_ins_t *ins, bool pending)
 {
     if (pending) {
         self->modulationPending = true;
+        if (ins->latchModulationToDownbeat && !ins->isRoundTrip) {
+            _MS_nudgeScaledClockIntoPhase(self);
+        }
     } else {
         self->modulationPending = false;
         self->resetPending = false;
+        self->nudgeFactor = 1.0;
     }
 }
 
@@ -113,9 +131,15 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
         self->memoizedBeatsPerMeasure = 0;
         self->countdown = 0;
         self->memoizedCountdownMax = 0;
+        self->originalBeatsPerMeasure = 0;
         outs->eom = true;
-        _MS_setModulationPending(self, false);
+        _MS_setModulationPending(self, ins, false);
         return;
+    }
+
+    // If this is the first modulation, store the original time signature
+    if (self->originalBeatsPerMeasure == 0) {
+        self->originalBeatsPerMeasure = self->beatsPerMeasure;
     }
 
     // === Normal modulation.
@@ -167,7 +191,9 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
         ins->subdivisionsPerMeasure = self->beatsPerMeasure;
 
         if (self->isLatching) {
-            _MS_startCountdownMemoized(self, ins);
+            if (ins->isRoundTrip) {
+                _MS_startCountdownMemoized(self, ins);
+            }
         } else {
             float currentBeatsInRootTimeSignature = ((float) self->scaledBeatCounter + self->scaledClockPhase) * self->tempoDivide / self->tempoMultiply;
             currentBeatsInRootTimeSignature = fmod(currentBeatsInRootTimeSignature, self->tempoDivide);
@@ -175,7 +201,7 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
             if (self->rootClockPhaseOffset < 0) self->rootClockPhaseOffset += self->tempoDivide;
         }
 
-        _MS_setModulationPending(self, false);
+        _MS_setModulationPending(self, ins, false);
         outs->eom = true;
     } else {
         self->tempoMultiply = self->homeTempoMultiply;
@@ -185,6 +211,8 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
         ins->beatsPerMeasure = self->beatsPerMeasure;
         ins->subdivisionsPerMeasure = self->subdivisionsPerMeasure;
 
+        // In round-trip/free mode, there's no need to do this phase computation, because
+        // you're already guaranteed to be in phase by virtue of the countdown.
         if (!self->isLatching) {
             // TODO: figure out a way to do this that doesn't involve duplication
             float currentBeatsInRootTimeSignature = ((float) self->scaledBeatCounter + self->scaledClockPhase) * self->tempoDivide / self->tempoMultiply;
@@ -198,7 +226,8 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
         self->memoizedBeatsPerMeasure = 0;
         self->countdown = 0;
         self->memoizedCountdownMax = 0;
-        _MS_setModulationPending(self, false);
+        self->originalBeatsPerMeasure = 0;
+        _MS_setModulationPending(self, ins, false);
     }
 
     // Special case--force us to leave a round trip modulation if we're no longer in round trip
@@ -243,9 +272,9 @@ static inline void _MS_processModulationInput(messd_t *self, messd_ins_t *ins)
         // and already modulated
 
         if (self->inRoundTripModulation && self->modulationPending) {
-            _MS_setModulationPending(self, false);
+            _MS_setModulationPending(self, ins, false);
         } else {
-            _MS_setModulationPending(self, true);
+            _MS_setModulationPending(self, ins, true);
         }
     }
 
@@ -256,16 +285,16 @@ static inline void _MS_processModulationInput(messd_t *self, messd_ins_t *ins)
         // If not, it cancels the pending modulation
         if (ins->isRoundTrip) {
             if (self->inRoundTripModulation) {
-                _MS_setModulationPending(self, true);
+                _MS_setModulationPending(self, ins, true);
             } else if (self->modulationPending) {
-                _MS_setModulationPending(self, false);
+                _MS_setModulationPending(self, ins, false);
             }
         }
     }
 
     // Lagging edge on modulate button
     if (self->modulateOnEdgeEnabled && self->lastModulationSwitch && !ins->modulationSwitch) {
-        _MS_setModulationPending(self, !self->modulationPending);
+        _MS_setModulationPending(self, ins, !self->modulationPending);
     }
 
     if (!ins->modulationSwitch) {
@@ -274,7 +303,7 @@ static inline void _MS_processModulationInput(messd_t *self, messd_ins_t *ins)
 
     // Any reset
     if (ins->reset && !self->resetPending) {
-        _MS_setModulationPending(self, true);
+        _MS_setModulationPending(self, ins, true);
         self->resetPending = true;
         self->modulateOnEdgeEnabled = false;
     }
@@ -325,6 +354,11 @@ static inline void _MS_process_updateRootClockPhase(messd_t *self, messd_ins_t *
         self->rootBeatCounter = (self->rootBeatCounter + 1) % self->tempoDivide;
         if (self->countdown == 0) self->countdown = self->memoizedCountdownMax;
         if (self->countdown != 0) self->countdown--;
+        if (self->originalBeatsPerMeasure == 0) {
+            self->originalBeatCounter = self->rootBeatCounter;
+        } else {
+            self->originalBeatCounter = (self->originalBeatCounter + 1) % self->originalBeatsPerMeasure;
+        }
     }
     self->rootClockPhase = nextRootClockPhase;
 }
@@ -337,6 +371,7 @@ static inline bool _MS_process_updateScaledClockPhase(messd_t *self, messd_ins_t
     if (offsetRootMeasurePhase > self->tempoDivide) offsetRootMeasurePhase -= self->tempoDivide;
 
     float nextScaledClockPhase = (offsetRootMeasurePhase * self->tempoMultiply) / self->tempoDivide;
+    nextScaledClockPhase *= self->nudgeFactor;
     nextScaledClockPhase = fmod(nextScaledClockPhase, 1.0f);
 
     bool beatEvent = false;

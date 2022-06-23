@@ -57,6 +57,10 @@ typedef struct messd
     uint16_t countdown;                 // Root clock events remaining until the clocks are in sync
     uint16_t memoizedCountdownMax;
     uint8_t memoizedBeatsPerMeasure;
+    uint8_t originalBeatCounter;        // Beat counter from before the first modulation
+    uint8_t originalBeatsPerMeasure;    // The beats per measure from before the first modulation
+    float nudgeFactor;                  // Factor by which to nudge the scaled clock during a pending modulation
+                                        //  to guarantee that the two clocks will align on the next downbeat
     bool isLatching;
 
 #ifdef TRACK_INPUT_CLOCK_PERIOD
