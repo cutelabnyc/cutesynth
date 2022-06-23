@@ -34,6 +34,7 @@ void MS_init(messd_t *self)
     self->originalBeatCounter = 0;
     self->originalBeatsPerMeasure = 0;
     self->nudgeFactor = 1.0;
+    self->lastPreNudgedScaledPhase = 0.0;
     self->isLatching = false;
 
     self->rootBeatCounter = 0;
@@ -370,19 +371,22 @@ static inline bool _MS_process_updateScaledClockPhase(messd_t *self, messd_ins_t
     float offsetRootMeasurePhase = (self->rootClockPhase + self->rootBeatCounter + self->rootClockPhaseOffset);
     if (offsetRootMeasurePhase > self->tempoDivide) offsetRootMeasurePhase -= self->tempoDivide;
 
-    float nextScaledClockPhase = (offsetRootMeasurePhase * self->tempoMultiply) / self->tempoDivide;
+    float nextRawScaledClockPhase = (offsetRootMeasurePhase * self->tempoMultiply) / self->tempoDivide;
+    float nextScaledClockPhase;
 
     // Okay, here's where things get interesting. Rather than simply setting the next phase,
     // we compute a delta which we can scale by the nudge factor if we so choose.
     if (self->nudgeFactor != 1.0f) {
-        nextScaledClockPhase = fmod(nextScaledClockPhase, 1.0f);
-        float scaledPhaseDelta = nextScaledClockPhase - self->scaledClockPhase;
-        if (scaledPhaseDelta < 0) scaledPhaseDelta = 1.0 - scaledPhaseDelta;
+        float scaledPhaseDelta = nextRawScaledClockPhase - self->lastPreNudgedScaledPhase;
+        if (scaledPhaseDelta < 0) scaledPhaseDelta = (float) self->tempoMultiply - scaledPhaseDelta;
         scaledPhaseDelta *= self->nudgeFactor;
-        nextScaledClockPhase = self->scaledClockPhase + scaledPhaseDelta;
+        nextScaledClockPhase = self->lastPreNudgedScaledPhase + scaledPhaseDelta;
+        nextScaledClockPhase = fmod(nextScaledClockPhase, 1.0f);
+    } else {
+        nextScaledClockPhase = fmod(nextRawScaledClockPhase, 1.0f);
     }
 
-    nextScaledClockPhase = fmod(nextScaledClockPhase, 1.0f);
+    self->lastPreNudgedScaledPhase = nextRawScaledClockPhase;
 
     bool beatEvent = false;
     if ((self->scaledClockPhase - nextScaledClockPhase > 0.5))

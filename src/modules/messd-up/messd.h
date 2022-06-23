@@ -61,6 +61,7 @@ typedef struct messd
     uint8_t originalBeatsPerMeasure;    // The beats per measure from before the first modulation
     float nudgeFactor;                  // Factor by which to nudge the scaled clock during a pending modulation
                                         //  to guarantee that the two clocks will align on the next downbeat
+    float lastPreNudgedScaledPhase;     // Needed to adjust the scaled phase by the nudge factor
     bool isLatching;
 
 #ifdef TRACK_INPUT_CLOCK_PERIOD
