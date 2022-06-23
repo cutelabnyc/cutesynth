@@ -133,6 +133,7 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
         self->countdown = 0;
         self->memoizedCountdownMax = 0;
         self->originalBeatsPerMeasure = 0;
+        self->originalBeatCounter = 0;
         outs->eom = true;
         _MS_setModulationPending(self, ins, false);
         return;
@@ -355,9 +356,7 @@ static inline void _MS_process_updateRootClockPhase(messd_t *self, messd_ins_t *
         self->rootBeatCounter = (self->rootBeatCounter + 1) % self->tempoDivide;
         if (self->countdown == 0) self->countdown = self->memoizedCountdownMax;
         if (self->countdown != 0) self->countdown--;
-        if (self->tempoDivide == 1 && self->tempoMultiply == 1) {
-            self->originalBeatCounter = (self->originalBeatCounter + 1) % self->beatsPerMeasure;
-        } else {
+        if (self->tempoDivide != 1 || self->tempoMultiply != 1) {
             self->originalBeatCounter = (self->originalBeatCounter + 1) % self->originalBeatsPerMeasure;
         }
     }
@@ -382,6 +381,10 @@ static inline bool _MS_process_updateScaledClockPhase(messd_t *self, messd_ins_t
         beatEvent = true;
     }
     self->scaledClockPhase = nextScaledClockPhase;
+
+    if (self->tempoDivide == 1 && self->tempoMultiply == 1) {
+        self->originalBeatCounter = self->scaledBeatCounter;
+    }
 
     return beatEvent;
 }
