@@ -355,8 +355,8 @@ static inline void _MS_process_updateRootClockPhase(messd_t *self, messd_ins_t *
         self->rootBeatCounter = (self->rootBeatCounter + 1) % self->tempoDivide;
         if (self->countdown == 0) self->countdown = self->memoizedCountdownMax;
         if (self->countdown != 0) self->countdown--;
-        if (self->originalBeatsPerMeasure == 0) {
-            self->originalBeatCounter = self->rootBeatCounter;
+        if (self->tempoDivide == 1 && self->tempoMultiply == 1) {
+            self->originalBeatCounter = (self->originalBeatCounter + 1) % self->beatsPerMeasure;
         } else {
             self->originalBeatCounter = (self->originalBeatCounter + 1) % self->originalBeatsPerMeasure;
         }
