@@ -380,7 +380,7 @@ static inline bool _MS_process_updateScaledClockPhase(messd_t *self, messd_ins_t
         float scaledPhaseDelta = nextRawScaledClockPhase - self->lastPreNudgedScaledPhase;
         if (scaledPhaseDelta < 0) scaledPhaseDelta = (float) self->tempoMultiply - scaledPhaseDelta;
         scaledPhaseDelta *= self->nudgeFactor;
-        nextScaledClockPhase = self->lastPreNudgedScaledPhase + scaledPhaseDelta;
+        nextScaledClockPhase = self->scaledClockPhase + scaledPhaseDelta;
         nextScaledClockPhase = fmod(nextScaledClockPhase, 1.0f);
     } else {
         nextScaledClockPhase = fmod(nextRawScaledClockPhase, 1.0f);
