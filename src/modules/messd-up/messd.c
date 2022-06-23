@@ -305,13 +305,8 @@ static inline void _MS_processModulationInput(messd_t *self, messd_ins_t *ins)
         self->modulateOnEdgeEnabled = true;
     }
 
-    bool forceReset = false;
-    if ((ins->isRoundTrip != self->lastRoundTripSetting && self->lastRoundTripSetting != -1)
-        ||
-        (ins->latchModulationToDownbeat != self->lastModulationLatchSetting && self->lastModulationLatchSetting != -1))
-    {
-        // forceReset = true;
-    }
+    bool forceReset = (ins->isRoundTrip != self->lastRoundTripSetting && self->lastRoundTripSetting != -1);
+    forceReset |= (ins->latchModulationToDownbeat != self->lastModulationLatchSetting && self->lastModulationLatchSetting != -1);
     self->lastRoundTripSetting = ins->isRoundTrip;
     self->lastModulationLatchSetting = ins->latchModulationToDownbeat;
 
