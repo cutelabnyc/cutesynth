@@ -523,6 +523,7 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
         self->rootClockPhaseOffset = 0.0f;
         self->rootBeatCounter = 0;
         self->scaledBeatCounter = 0;
+        onScaledClockDownbeat = true;
     }
 
     if (onScaledClockDownbeat) {
