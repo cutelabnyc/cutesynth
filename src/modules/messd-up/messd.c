@@ -33,8 +33,12 @@ void MS_init(messd_t *self)
     self->memoizedBeatsPerMeasure = 1;
     self->originalBeatCounter = 0;
     self->originalBeatsPerMeasure = 0;
+
+#ifdef USE_TEMPO_NUDGE
     self->nudgeFactor = 1.0;
     self->lastPreNudgedScaledPhase = 0.0;
+#endif // USE_TEMPO_NUDGE
+
     self->lastModulationLatchSetting = -1;
     self->lastRoundTripSetting = -1;
 
@@ -81,6 +85,7 @@ static uint16_t leastCommonMultiple(uint16_t x, uint16_t y)
     return x * y;
 }
 
+#ifdef USE_TEMPO_NUDGE
 // Returns the factor by which the current scaled clock must be sped up or slowed down to guarantee that
 // the two clocks will align on the next downbeat
 static void _MS_nudgeScaledClockIntoPhase(messd_t *self)
@@ -92,18 +97,25 @@ static void _MS_nudgeScaledClockIntoPhase(messd_t *self)
     scaleFactor *= ((float) self->tempoDivide) / ((float) self->tempoMultiply);
     self->nudgeFactor = scaleFactor;
 }
+#endif // USE_TEMPO_NUDGE
 
 static void _MS_setModulationPending(messd_t *self, messd_ins_t *ins, bool pending)
 {
     if (pending) {
         self->modulationPending = true;
+
+        #ifdef USE_TEMPO_NUDGE
         if (ins->latchModulationToDownbeat && !ins->isRoundTrip) {
             _MS_nudgeScaledClockIntoPhase(self);
         }
+        #endif // USE_TEMPO_NUDGE
     } else {
         self->modulationPending = false;
         self->resetPending = false;
+
+        #ifdef USE_TEMPO_NUDGE
         self->nudgeFactor = 1.0;
+        #endif // USE_TEMPO_NUDGE
     }
 }
 
@@ -194,10 +206,8 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
         // Set subdivisions equal to beats on metric modulation
         ins->subdivisionsPerMeasure = self->beatsPerMeasure;
 
-        if (ins->latchModulationToDownbeat) {
-            if (ins->isRoundTrip) {
-                _MS_startCountdownMemoized(self, ins);
-            }
+        if (ins->latchModulationToDownbeat && ins->isRoundTrip) {
+            _MS_startCountdownMemoized(self, ins);
         } else {
             float currentBeatsInRootTimeSignature = ((float) self->scaledBeatCounter + self->scaledClockPhase) * self->tempoDivide / self->tempoMultiply;
             currentBeatsInRootTimeSignature = fmod(currentBeatsInRootTimeSignature, self->tempoDivide);
@@ -233,20 +243,6 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
         self->originalBeatsPerMeasure = 0;
         _MS_setModulationPending(self, ins, false);
     }
-
-    // Special case--force us to leave a round trip modulation if we're no longer in round trip
-    // mode, but we're in a round trip modoulation
-    // TODO: handle this ridiculous case
-    // if (self->inRoundTripModulation && !ins->isRoundTrip) {
-    //     self->tempoMultiply = self->homeTempoMultiply;
-    //     self->tempoDivide = self->homeTempoDivide;
-    //     self->subdivisionsPerMeasure = self->homeSubdivisionsPerMeasure;
-    //     self->beatsPerMeasure = self->homeBeatsPerMeasure;
-    //     ins->beatsPerMeasure = self->beatsPerMeasure;
-    //     ins->subdivisionsPerMeasure = self->subdivisionsPerMeasure;
-    //     outs->eom = true;
-    //     self->inRoundTripModulation = false;
-    // }
 }
 
 static void _MS_handleLatchBeats(messd_t *self, messd_ins_t *ins)
@@ -382,6 +378,7 @@ static inline bool _MS_process_updateScaledClockPhase(messd_t *self, messd_ins_t
 
     // Okay, here's where things get interesting. Rather than simply setting the next phase,
     // we compute a delta which we can scale by the nudge factor if we so choose.
+#ifdef USE_TEMPO_NUDGE
     if (self->nudgeFactor != 1.0f) {
         float scaledPhaseDelta = nextRawScaledClockPhase - self->lastPreNudgedScaledPhase;
         if (scaledPhaseDelta < 0) scaledPhaseDelta = (float) self->tempoMultiply + scaledPhaseDelta;
@@ -393,6 +390,9 @@ static inline bool _MS_process_updateScaledClockPhase(messd_t *self, messd_ins_t
     }
 
     self->lastPreNudgedScaledPhase = nextRawScaledClockPhase;
+#else
+    nextScaledClockPhase = fmod(nextRawScaledClockPhase, 1.0f);
+#endif // USE_TEMPO_NUDGE
 
     bool beatEvent = false;
     if ((self->scaledClockPhase - nextScaledClockPhase > 0.5))

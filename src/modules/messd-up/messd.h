@@ -21,6 +21,9 @@
 // and leave this commented out to save on program memory
 // #define TRACK_INPUT_CLOCK_PERIOD
 
+// Uncomment to "nudge" the tempo (speed up/slow down) when modulating in one-way/latch mode
+// #define USE_TEMPO_NUDGE
+
  /**
   * messd_t: Module's main data structure
   */
@@ -59,9 +62,13 @@ typedef struct messd
     uint8_t memoizedBeatsPerMeasure;
     uint8_t originalBeatCounter;        // Beat counter from before the first modulation
     uint8_t originalBeatsPerMeasure;    // The beats per measure from before the first modulation
+
+    #ifdef USE_TEMPO_NUDGE
     float nudgeFactor;                  // Factor by which to nudge the scaled clock during a pending modulation
                                         //  to guarantee that the two clocks will align on the next downbeat
     float lastPreNudgedScaledPhase;     // Needed to adjust the scaled phase by the nudge factor
+    #endif // USE_TEMPO_NUDGE
+
     int8_t lastModulationLatchSetting;
     int8_t lastRoundTripSetting;
 
