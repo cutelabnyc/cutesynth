@@ -517,20 +517,13 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     bool onScaledClockDownbeat = _MS_process_updateScaledClockPhase(self, ins, outs);
 
     // -- Handle an input resetBeatCount
-    // TODO: Figure out how to handle resets
-    // if (ins->resetBeatCount) {
-    //     if (self->rootBeatCounter < 0.5) {
-    //         // Need to add a little bit of complex logic here, since we're basically saying that
-    //         // the last beat event _should_ have been a downbeat. We can't have known that a
-    //         // reset event was coming, so we need to handle downbeat latching now, on the reset
-    //         latchEvent = self->scaledBeatCounter != 0;
-    //         self->beatCounter = 0;
-    //         self->scaledBeatCounter = 0;
-    //     } else {
-    //         self->beatCounter = self->tempoDivide - 1;
-    //         self->scaledBeatCounter = self->beatsPerMeasure - 1;
-    //     }
-    // }
+    if (ins->resetBeatCount) {
+        self->rootClockPhase = 0.0f;
+        self->scaledClockPhase = 0.0f;
+        self->rootClockPhaseOffset = 0.0f;
+        self->rootBeatCounter = 0;
+        self->scaledBeatCounter = 0;
+    }
 
     if (onScaledClockDownbeat) {
         _MS_process_triggerLatchedChanges(self, ins, outs);
