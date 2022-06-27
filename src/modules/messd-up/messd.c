@@ -222,6 +222,7 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
     } else {
         self->tempoMultiply = self->homeTempoMultiply;
         self->tempoDivide = self->homeTempoDivide;
+        self->rootBeatCounter %= self->tempoDivide;
         self->subdivisionsPerMeasure = self->homeSubdivisionsPerMeasure;
         self->beatsPerMeasure = self->homeBeatsPerMeasure;
         ins->beatsPerMeasure = self->beatsPerMeasure;
