@@ -49,6 +49,7 @@ void MS_init(messd_t *self)
     self->lastModulationSignal = false;
     self->inRoundTripModulation = false;
     self->modulationPending = false;
+    self->modulationForced = false;
     self->resetPending = false;
     self->modulateOnEdgeEnabled = true;
 
@@ -111,6 +112,7 @@ static void _MS_setModulationPending(messd_t *self, messd_ins_t *ins, bool pendi
         #endif // USE_TEMPO_NUDGE
     } else {
         self->modulationPending = false;
+        self->modulationForced = false;
         self->resetPending = false;
 
         #ifdef USE_TEMPO_NUDGE
@@ -267,34 +269,21 @@ static inline void _MS_processModulationInput(messd_t *self, messd_ins_t *ins)
 {
     // Leading edge on modulation signal
     if (!self->lastModulationSignal && ins->modulationSignal) {
-        // Usually this will cause a pending modulation, except in the unique case where
-        // we're jumping back up to "modulation high" when we're in round trip mode
-        // and already modulated
 
-        if (self->inRoundTripModulation && self->modulationPending) {
-            _MS_setModulationPending(self, ins, false);
-        } else {
+        // Leading edge on the modulation signal causes us to enter a pending modulation,
+        // unless we're already in a pending modulation
+        if (!self->modulationPending) {
             _MS_setModulationPending(self, ins, true);
-        }
-    }
-
-    // Lagging edge on modulation signal
-    if (self->lastModulationSignal && !ins->modulationSignal) {
-        // Does nothing unless we're in round trip mode. In RT mode,
-        // this triggers a modulation if we're in a round trip modulation.
-        // If not, it cancels the pending modulation
-        if (ins->isRoundTrip) {
-            if (self->inRoundTripModulation) {
-                _MS_setModulationPending(self, ins, true);
-            } else if (self->modulationPending) {
-                _MS_setModulationPending(self, ins, false);
-            }
         }
     }
 
     // Lagging edge on modulate button
     if (self->modulateOnEdgeEnabled && self->lastModulationSwitch && !ins->modulationSwitch) {
-        _MS_setModulationPending(self, ins, !self->modulationPending);
+        if (!self->modulationPending) {
+            _MS_setModulationPending(self, ins, !self->modulationPending);
+        } else {
+            self->modulationForced = true;
+        }
     }
 
     if (!ins->modulationSwitch) {
@@ -427,7 +416,9 @@ static inline void _MS_process_triggerLatchedChanges(messd_t *self, messd_ins_t 
         ||
         !self->inRoundTripModulation && self->scaledBeatCounter == 0
         ||
-        !ins->latchModulationToDownbeat;
+        !ins->latchModulationToDownbeat
+        ||
+        self->modulationForced;
     if (shouldModulate && self->modulationPending)
     {
         _MS_handleModulationLatch(self, ins, outs);
