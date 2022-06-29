@@ -440,6 +440,7 @@ static inline void _MS_process_calculateTruncationOutput(messd_t *self, messd_in
 
     // New algorithm: First divide the truncation into 9 parts
     int patternIndex = floor(ins->truncation * 9.0f);
+    outs->patternIndex = patternIndex;
     patternIndex %= 9;
 
     // Calculate measure phase
@@ -448,12 +449,14 @@ static inline void _MS_process_calculateTruncationOutput(messd_t *self, messd_in
 
     // Calculate phase prescale
     float prescale = self->beatsPerMeasure * self->subdivisionsPerMeasure;
+    outs->prescale = prescale;
     if (patternIndex < 4) prescale = self->beatsPerMeasure;
     if (patternIndex > 4) prescale = self->subdivisionsPerMeasure;
 
     // Calculate phase chunking
     int distance = abs(4 - patternIndex);
     float chunk = distance == 0 ? (self->beatsPerMeasure + self->subdivisionsPerMeasure) / 2 + 1 : distance + 1;
+    outs->chunk = chunk;
 
     // Chunk the phase
     measurePhase *= prescale;
@@ -468,14 +471,16 @@ static inline void _MS_process_calculateTruncationOutput(messd_t *self, messd_in
         if (factorScale < 1) factorScale = 1;
         scale = factor * factorScale;
     }
+    outs->scale = scale;
 
     // Calculate phase subchunking
     int subchunk = 1;
     if (patternIndex != 4) {
         subchunk = patternIndex < 4 ? self->subdivisionsPerMeasure : self->beatsPerMeasure;
-        subchunk = (subchunk / 2) + ((subchunk + 1) & 1) + 1;
+        subchunk = (subchunk / 2) + ((subchunk + 1) & 1);
         if (subchunk < 1) subchunk = 1;
     }
+    outs->subchunk = subchunk;
 
     // Calculate the final pattern
     float patternPhase = measurePhase * scale;

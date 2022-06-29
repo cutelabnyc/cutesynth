@@ -126,6 +126,13 @@ typedef struct messd_outs
     bool truncate;
     bool eom;
 
+    // debug
+    int patternIndex;
+    float scale;
+    int subchunk;
+    float prescale;
+    float chunk;
+
     bool invert;
     bool modulationPending; // High when modulation trigger is active
     bool resetPending; // High when the next modulation is resetting
