@@ -36,6 +36,7 @@ typedef struct messd
 
     uint8_t beatsPerMeasure; // Current number of beats to a measure
     uint8_t subdivisionsPerMeasure; // Current number of subdivisions to a measure
+    float patternFactor; // Latched pattern factor
     uint16_t tempoMultiply; // Together with tempoDivide, defines the duration ratio
                             // of one stretched beat to one root clock beat.
     uint16_t tempoDivide;

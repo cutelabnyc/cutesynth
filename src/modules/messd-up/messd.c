@@ -22,6 +22,7 @@ void MS_init(messd_t *self)
 
     self->beatsPerMeasure = 1;
     self->subdivisionsPerMeasure = 0;
+    self->patternFactor = 0.0f;
     self->tempoMultiply = 1;
     self->tempoDivide = 1;
 
@@ -259,6 +260,7 @@ static void _MS_handleLatchBeats(messd_t *self, messd_ins_t *ins)
 {
     // Update beats
     self->beatsPerMeasure = ins->beatsPerMeasure;
+    self->patternFactor = ins->truncation;
 
     // This will only update the countdown if the beatsPerMeasure have changed
     // TODO: handle this
@@ -439,7 +441,7 @@ static inline void _MS_process_calculateTruncationOutput(messd_t *self, messd_in
 {
 
     // New algorithm: First divide the truncation into 9 parts
-    int patternIndex = floor(ins->truncation * 9.0f);
+    int patternIndex = floor(self->patternFactor * 9.0f);
     outs->patternIndex = patternIndex;
     patternIndex %= 9;
 
