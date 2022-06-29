@@ -430,52 +430,51 @@ static inline void _MS_process_triggerLatchedChanges(messd_t *self, messd_ins_t 
 
 static inline void _MS_process_calculateTruncationOutput(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
 {
-    float subdivision = outs->subdivision;
 
-    // Calculate truncation
-    if (ins->truncation > 0.0f) {
-        float wrapfraction = ins->truncation * self->beatsPerMeasure;
-        wrapfraction = floorf(wrapfraction) + 1;
-        int truncation = (int) wrapfraction;
-        uint8_t truncatedBeatCount = (self->scaledBeatCounter / truncation) * truncation;
-        float measurePhaseInTrunc = fmodf(self->scaledClockPhase + self->scaledBeatCounter, truncation) / self->beatsPerMeasure;
-        float measureOffset = ((float) truncatedBeatCount) / self->beatsPerMeasure;
+    // New algorithm: First divide the truncation into 9 parts
+    int patternIndex = floor(ins->truncation * 9.0f);
+    patternIndex %= 9;
 
-        // Normally the subdivision phase is just the fractional component of the subdivision count.
-        // This changes however if we would overlap with the next truncation, or the end of the measure
-        float subdivisionProgress = measurePhaseInTrunc * self->subdivisionsPerMeasure;
-        float nextSubdivisionProgress = ceil(subdivisionProgress);
-        float subdivisionFrac = 1.0 / self->subdivisionsPerMeasure;
+    // Calculate measure phase
+    float measurePhase = self->scaledClockPhase + self->scaledBeatCounter;
+    measurePhase /= self->beatsPerMeasure;
 
-        // Next subdivision would go past the end of the measure
-        if (
-            truncatedBeatCount / truncation == truncation - 1 &&
-            nextSubdivisionProgress / self->subdivisionsPerMeasure + measureOffset > 1.0
-        ) {
-            subdivision = fmodf(subdivisionProgress, 1.0f);
-            subdivision /= (1.0 - (measureOffset + floor(subdivisionProgress) / self->subdivisionsPerMeasure));
-            subdivision *= subdivisionFrac;
-        }
+    // Calculate phase prescale
+    float prescale = self->beatsPerMeasure * self->subdivisionsPerMeasure;
+    if (patternIndex < 4) prescale = self->beatsPerMeasure;
+    if (patternIndex > 4) prescale = self->subdivisionsPerMeasure;
 
-        // Next subdivision would go past the next truncation
-        else if (
-            nextSubdivisionProgress / self->subdivisionsPerMeasure > ((float) truncation) / self->beatsPerMeasure
-        ) {
-            subdivision = fmodf(subdivisionProgress, 1.0f);
-            subdivision /= ((float) truncation) / self->beatsPerMeasure - floor(subdivisionProgress) / self->subdivisionsPerMeasure;
-            subdivision *= subdivisionFrac;
-        }
+    // Calculate phase chunking
+    int distance = abs(4 - patternIndex);
+    float chunk = distance == 4 ? (self->beatsPerMeasure + self->subdivisionsPerMeasure) / 2 + 1 : distance + 1;
 
-        // "Normal" situation
-        else {
-            subdivision = fmodf(subdivisionProgress, 1.0f);
-        }
+    // Chunk the phase
+    measurePhase *= prescale;
+    measurePhase = fmodf(measurePhase, chunk);
+    measurePhase /= chunk;
 
-        // In terms of phase
-        outs->truncate = subdivision < ins->pulseWidth;
-    } else {
-        outs->truncate = outs->subdivision;
+    // Calculate phase scale
+    float scale = 1;
+    float factor = patternIndex < 4 ? self->subdivisionsPerMeasure : self->beatsPerMeasure;
+    if (patternIndex != 4) {
+        int factorScale = max(log2(factor) - 1, 1);
+        scale = factor * factorScale;
     }
+
+    // Calculate phase subchunking
+    int subchunk = 1;
+    if (patternIndex != 4) {
+        subchunk = patternIndex < 4 ? self->subdivisionsPerMeasure : self->beatsPerMeasure;
+        subchunk = (subchunk / 2) + ((subchunk + 1) & 1) + 1;
+        subchunk = max(subchunk, 1);
+    }
+
+    // Calculate the final pattern
+    float patternPhase = measurePhase * scale;
+    patternPhase = fmodf(patternPhase, subchunk);
+    patternPhase /= (float) subchunk;
+
+    outs->truncate = patternPhase < ins->pulseWidth;
 }
 
 static inline void _MS_process_calculateOutputs(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
