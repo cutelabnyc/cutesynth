@@ -485,7 +485,7 @@ static inline void _MS_process_calculateTruncationOutput(messd_t *self, messd_in
     // Calculate the final pattern
     float patternPhase = measurePhase * scale;
     patternPhase = fmodf(patternPhase, subchunk);
-    patternPhase /= (float) subchunk;
+    // patternPhase /= (float) subchunk;
     outs->patternPhase = patternPhase;
 
     outs->truncate = patternPhase < ins->pulseWidth;
