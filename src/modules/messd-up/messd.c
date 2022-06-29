@@ -449,9 +449,9 @@ static inline void _MS_process_calculateTruncationOutput(messd_t *self, messd_in
 
     // Calculate phase prescale
     float prescale = self->beatsPerMeasure * self->subdivisionsPerMeasure;
-    outs->prescale = prescale;
     if (patternIndex < 4) prescale = self->beatsPerMeasure;
     if (patternIndex > 4) prescale = self->subdivisionsPerMeasure;
+    outs->prescale = prescale;
 
     // Calculate phase chunking
     int distance = abs(4 - patternIndex);
@@ -486,6 +486,7 @@ static inline void _MS_process_calculateTruncationOutput(messd_t *self, messd_in
     float patternPhase = measurePhase * scale;
     patternPhase = fmodf(patternPhase, subchunk);
     patternPhase /= (float) subchunk;
+    outs->patternPhase = patternPhase;
 
     outs->truncate = patternPhase < ins->pulseWidth;
 }

@@ -132,6 +132,7 @@ typedef struct messd_outs
     int subchunk;
     float prescale;
     float chunk;
+    float patternPhase;
 
     bool invert;
     bool modulationPending; // High when modulation trigger is active
