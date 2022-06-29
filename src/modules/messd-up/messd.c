@@ -453,7 +453,7 @@ static inline void _MS_process_calculateTruncationOutput(messd_t *self, messd_in
 
     // Calculate phase chunking
     int distance = abs(4 - patternIndex);
-    float chunk = distance == 4 ? (self->beatsPerMeasure + self->subdivisionsPerMeasure) / 2 + 1 : distance + 1;
+    float chunk = distance == 0 ? (self->beatsPerMeasure + self->subdivisionsPerMeasure) / 2 + 1 : distance + 1;
 
     // Chunk the phase
     measurePhase *= prescale;
