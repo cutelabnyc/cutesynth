@@ -5,6 +5,13 @@
 #define MAX_TEMPO (1000)
 #define MIN_TEMPO (12)
 
+unsigned int log2( unsigned int x )
+{
+    unsigned int ans = 0 ;
+    while( x>>=1 ) ans++;
+    return ans ;
+}
+
 void MS_init(messd_t *self)
 {
     phasor_init(&self->internalClock);
@@ -455,9 +462,10 @@ static inline void _MS_process_calculateTruncationOutput(messd_t *self, messd_in
 
     // Calculate phase scale
     float scale = 1;
-    float factor = patternIndex < 4 ? self->subdivisionsPerMeasure : self->beatsPerMeasure;
+    int factor = patternIndex < 4 ? self->subdivisionsPerMeasure : self->beatsPerMeasure;
     if (patternIndex != 4) {
-        int factorScale = max(log2(factor) - 1, 1);
+        int factorScale = log2(factor) - 1;
+        if (factorScale < 1) factorScale = 1;
         scale = factor * factorScale;
     }
 
@@ -466,7 +474,7 @@ static inline void _MS_process_calculateTruncationOutput(messd_t *self, messd_in
     if (patternIndex != 4) {
         subchunk = patternIndex < 4 ? self->subdivisionsPerMeasure : self->beatsPerMeasure;
         subchunk = (subchunk / 2) + ((subchunk + 1) & 1) + 1;
-        subchunk = max(subchunk, 1);
+        if (subchunk < 1) subchunk = 1;
     }
 
     // Calculate the final pattern
