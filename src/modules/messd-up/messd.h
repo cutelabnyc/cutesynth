@@ -12,6 +12,7 @@
 
 #include <stdbool.h>
 #include <cutesynth.h>
+#include <math.h>
 
 #define NUM_DIVISION_VALUES 10
 #define MS_PER_MINUTE 60000
