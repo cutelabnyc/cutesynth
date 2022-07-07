@@ -439,56 +439,20 @@ static inline void _MS_process_triggerLatchedChanges(messd_t *self, messd_ins_t 
 
 static inline void _MS_process_calculateTruncationOutput(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
 {
+    // Newest and simplest idea: truncation output is simply the subdivision output, but with
+    // a hard reset point somewhere in the measure.
 
-    // New algorithm: First divide the truncation into 9 parts
-    int patternIndex = floor(self->patternFactor * 9.0f);
-    outs->patternIndex = patternIndex;
-    patternIndex %= 9;
+    // If truncation is less than 0, simply return subdivision
+    if (self->patternFactor < 0 || self->patternFactor == 0.0f || self->patternFactor == 1.0f) {
+        outs->truncate = outs->subdivision;
+        return;
+    }
 
-    // Calculate measure phase
+    float truncfac = fmod(self->patternFactor, 1.0f) * self->beatsPerMeasure;
     float measurePhase = self->scaledClockPhase + self->scaledBeatCounter;
-    measurePhase /= self->beatsPerMeasure;
-
-    // Calculate phase prescale
-    float prescale = self->beatsPerMeasure * self->subdivisionsPerMeasure;
-    if (patternIndex < 4) prescale = self->beatsPerMeasure;
-    if (patternIndex > 4) prescale = self->subdivisionsPerMeasure;
-    outs->prescale = prescale;
-
-    // Calculate phase chunking
-    int distance = abs(4 - patternIndex);
-    float chunk = distance == 0 ? (self->beatsPerMeasure + self->subdivisionsPerMeasure) / 2 + 1 : distance + 1;
-    outs->chunk = chunk;
-
-    // Chunk the phase
-    measurePhase *= prescale;
-    measurePhase = fmodf(measurePhase, chunk);
-    measurePhase /= chunk;
-
-    // Calculate phase scale
-    float scale = 1;
-    int factor = patternIndex < 4 ? self->subdivisionsPerMeasure : self->beatsPerMeasure;
-    if (patternIndex != 4) {
-        int factorScale = log2(factor) - 1;
-        if (factorScale < 1) factorScale = 1;
-        scale = factor * factorScale;
-    }
-    outs->scale = scale;
-
-    // Calculate phase subchunking
-    int subchunk = 1;
-    if (patternIndex != 4) {
-        subchunk = patternIndex < 4 ? self->subdivisionsPerMeasure : self->beatsPerMeasure;
-        subchunk = (subchunk / 2) + ((subchunk + 1) & 1);
-        if (subchunk < 1) subchunk = 1;
-    }
-    outs->subchunk = subchunk;
-
-    // Calculate the final pattern
-    float patternPhase = measurePhase * scale;
-    patternPhase = fmodf(patternPhase, subchunk);
-    // patternPhase /= (float) subchunk;
-    outs->patternPhase = patternPhase;
+    if (measurePhase > truncfac) measurePhase -= truncfac;
+    measurePhase /= (float) self->beatsPerMeasure;
+    float patternPhase = fmod(measurePhase * self->subdivisionsPerMeasure, 1.0f);
 
     outs->truncate = patternPhase < ins->pulseWidth;
 }
