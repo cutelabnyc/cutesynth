@@ -275,9 +275,9 @@ static void _MS_handleLatchDivs(messd_t *self, messd_ins_t *ins)
 
 // Process the modulation signal and switch input and either trigger or
 // cancel a modulation accordingly.
-static inline void _MS_processModulationInput(messd_t *self, messd_ins_t *ins)
+static inline void _MS_processModulationInput(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
 {
-    bool modulationWouldHaveNoEffect = (!self->inRoundTripModulation) && (self->beatsPerMeasure == self->subdivisionsPerMeasure);
+    bool modulationWouldHaveNoEffect = (!self->inRoundTripModulation) && (ins->beatsPerMeasure == ins->subdivisionsPerMeasure);
 
     // Leading edge on modulation signal
     if (!self->lastModulationSignal && ins->modulationSignal) {
@@ -286,6 +286,8 @@ static inline void _MS_processModulationInput(messd_t *self, messd_ins_t *ins)
         // unless we're already in a pending modulation
         if (!self->modulationPending && !modulationWouldHaveNoEffect) {
             _MS_setModulationPending(self, ins, true);
+        } else if (modulationWouldHaveNoEffect) {
+            outs->modulationRequestSkipped = true;
         }
     }
 
@@ -293,7 +295,9 @@ static inline void _MS_processModulationInput(messd_t *self, messd_ins_t *ins)
     if (self->modulateOnEdgeEnabled && self->lastModulationSwitch && !ins->modulationSwitch) {
         if (!self->modulationPending && !modulationWouldHaveNoEffect) {
             _MS_setModulationPending(self, ins, !self->modulationPending);
-        } else {
+        } else if (modulationWouldHaveNoEffect) {
+            outs->modulationRequestSkipped = true;
+        } else  {
             self->modulationForced = true;
         }
     }
@@ -484,6 +488,7 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     float subdivision = 0;
     float phasor = 0;
     outs->eom = false;
+    outs->modulationRequestSkipped = false;
 
     // Potentially enter a "modulation pending" state
     _MS_processModulationInput(self, ins);

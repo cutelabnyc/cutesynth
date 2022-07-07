@@ -126,6 +126,7 @@ typedef struct messd_outs
     bool phase;
     bool truncate;
     bool eom;
+    bool modulationRequestSkipped;
 
     // debug
     int patternIndex;
