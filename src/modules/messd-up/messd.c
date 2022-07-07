@@ -277,19 +277,21 @@ static void _MS_handleLatchDivs(messd_t *self, messd_ins_t *ins)
 // cancel a modulation accordingly.
 static inline void _MS_processModulationInput(messd_t *self, messd_ins_t *ins)
 {
+    bool modulationWouldHaveNoEffect = (!self->inRoundTripModulation) && (self->beatsPerMeasure == self->subdivisionsPerMeasure);
+
     // Leading edge on modulation signal
     if (!self->lastModulationSignal && ins->modulationSignal) {
 
         // Leading edge on the modulation signal causes us to enter a pending modulation,
         // unless we're already in a pending modulation
-        if (!self->modulationPending) {
+        if (!self->modulationPending && !modulationWouldHaveNoEffect) {
             _MS_setModulationPending(self, ins, true);
         }
     }
 
     // Lagging edge on modulate button
     if (self->modulateOnEdgeEnabled && self->lastModulationSwitch && !ins->modulationSwitch) {
-        if (!self->modulationPending) {
+        if (!self->modulationPending && !modulationWouldHaveNoEffect) {
             _MS_setModulationPending(self, ins, !self->modulationPending);
         } else {
             self->modulationForced = true;
