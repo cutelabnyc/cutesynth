@@ -434,7 +434,7 @@ static inline void _MS_process_triggerLatchedChanges(messd_t *self, messd_ins_t 
         ||
         !ins->latchModulationToDownbeat;
     if (ins->modulationSwitch) shouldModulate = false;
-    shouldModulate != self->modulationForced
+    shouldModulate |= self->modulationForced
         ||
         self->resetPending;
     if (shouldModulate && self->modulationPending)
