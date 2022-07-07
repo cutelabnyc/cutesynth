@@ -292,7 +292,7 @@ static inline void _MS_processModulationInput(messd_t *self, messd_ins_t *ins, m
     }
 
     // Lagging edge on modulate button
-    if (self->modulateOnEdgeEnabled && self->lastModulationSwitch && !ins->modulationSwitch) {
+    if (self->modulateOnEdgeEnabled && !self->lastModulationSwitch && ins->modulationSwitch) {
         if (!self->modulationPending && !modulationWouldHaveNoEffect) {
             _MS_setModulationPending(self, ins, !self->modulationPending);
         } else if (modulationWouldHaveNoEffect) {
@@ -432,9 +432,9 @@ static inline void _MS_process_triggerLatchedChanges(messd_t *self, messd_ins_t 
         ||
         !self->inRoundTripModulation && self->scaledBeatCounter == 0
         ||
-        !ins->latchModulationToDownbeat
-        ||
-        self->modulationForced
+        !ins->latchModulationToDownbeat;
+    if (ins->modulationSwitch) shouldModulate = false;
+    shouldModulate != self->modulationForced
         ||
         self->resetPending;
     if (shouldModulate && self->modulationPending)
