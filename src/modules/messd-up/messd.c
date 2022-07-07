@@ -491,7 +491,7 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     outs->modulationRequestSkipped = false;
 
     // Potentially enter a "modulation pending" state
-    _MS_processModulationInput(self, ins);
+    _MS_processModulationInput(self, ins, outs);
     _MS_process_handleInputClock(self, ins, outs);
     _MS_process_updateRootClockPhase(self, ins, outs);
     bool onScaledClockDownbeat = _MS_process_updateScaledClockPhase(self, ins, outs);
