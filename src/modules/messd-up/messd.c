@@ -260,7 +260,6 @@ static void _MS_handleLatchBeats(messd_t *self, messd_ins_t *ins)
 {
     // Update beats
     self->beatsPerMeasure = ins->beatsPerMeasure;
-    self->patternFactor = ins->truncation;
 
     // This will only update the countdown if the beatsPerMeasure have changed
     // TODO: handle this
@@ -447,6 +446,9 @@ static inline void _MS_process_calculateTruncationOutput(messd_t *self, messd_in
 {
     // Newest and simplest idea: truncation output is simply the subdivision output, but with
     // a hard reset point somewhere in the measure.
+
+    // For now, don't bother to latch this
+    self->patternFactor = ins->truncation;
 
     // If truncation is less than 0, simply return subdivision
     if (self->patternFactor < 0 || self->patternFactor == 0.0f || self->patternFactor == 1.0f) {
