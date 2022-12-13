@@ -5,13 +5,6 @@
 #define MAX_TEMPO (1000)
 #define MIN_TEMPO (12)
 
-unsigned int log2( unsigned int x )
-{
-    unsigned int ans = 0 ;
-    while( x>>=1 ) ans++;
-    return ans ;
-}
-
 void MS_init(messd_t *self)
 {
     phasor_init(&self->internalClock);
