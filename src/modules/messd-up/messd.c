@@ -422,6 +422,8 @@ static inline void _MS_process_triggerLatchedChanges(messd_t *self, messd_ins_t 
     // Then handle modulation changes
     bool shouldModulate = self->inRoundTripModulation && self->countdown == 0
         ||
+        self->inRoundTripModulation && !ins->resyncToExternal && self->scaledBeatCounter == 0
+        ||
         !self->inRoundTripModulation && self->scaledBeatCounter == 0
         ||
         !ins->latchModulationToDownbeat;

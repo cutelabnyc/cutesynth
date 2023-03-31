@@ -97,6 +97,7 @@ typedef struct messd_ins
     float truncation; // normalized to the number of beats
     float ext_clock;
 
+    bool resyncToExternal; // On modulating out of a round trip, sync to the external clock
     bool modulationSignal; // continuous modulation signal
     bool modulationSwitch; // modulation pushbutton
     bool latchBeatChangesToDownbeat;
