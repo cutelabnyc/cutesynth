@@ -441,7 +441,7 @@ static inline void _MS_process_calcTenMillisecondPhase(messd_t *self, messd_ins_
 {
     float rootTenMillisPhase = 10.0f / self->measuredPeriod; // phase for 10 milliseconds in input clock time
     float scaledTenMillisPhase = rootTenMillisPhase * self->tempoDivide / self->tempoMultiply;
-    float subdivTenMillisPhase = scaledTenMillisPhase * self->beatsPerMeasure / self->subdivisionsPerMeasure;
+    float subdivTenMillisPhase = scaledTenMillisPhase * self->subdivisionsPerMeasure / self->beatsPerMeasure;
 
     self->beatPhaseTenMillis = scaledTenMillisPhase;
     self->divPhaseTenMillis = subdivTenMillisPhase;
