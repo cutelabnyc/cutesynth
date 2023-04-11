@@ -202,6 +202,7 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
             self->tempoDivide = self->tempoDivide >> 1;
         }
 
+        // Update according to modulation style
         if (ins->modulationStyle == 0) {
             // sync
             self->subdivisionsPerMeasure = self->beatsPerMeasure;
@@ -216,9 +217,6 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
 
         self->rootBeatsSinceModulation = 0;
         self->rootBeatCounter %= self->tempoDivide;
-
-        // Set subdivisions equal to beats on metric modulation
-        ins->subdivisionsPerMeasure = self->beatsPerMeasure;
 
         if (ins->latchModulationToDownbeat && ins->isRoundTrip) {
             _MS_startCountdownMemoized(self, ins);
