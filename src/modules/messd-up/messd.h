@@ -45,6 +45,8 @@ typedef struct messd
     float scaledClockPhase; // Previous phase of the internal phasor after stretching
     float rootClockPhaseOffset; // Offset in <unstretched-beats>.<phase> of the internal clock
                                 // to maintain alignent in free mode
+    float beatPhaseTenMillis; // Phase corresponding to 10 milliseconds (beats / downbeats)
+    float divPhaseTenMillis; // Phase corresponding to 10 milliseconds (divs / trunc)
 
     // Stuff needed for round-trip mode
     // These values are recorded whenever the module enters a round-trip modulation
@@ -110,6 +112,7 @@ typedef struct messd_ins
 
     float phase;
     float pulseWidth;
+    bool useTenMillisecondWidth;
 
     float delta;
     unsigned long cheatedMeasuredPeriod;

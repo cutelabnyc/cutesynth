@@ -437,6 +437,16 @@ static inline void _MS_process_triggerLatchedChanges(messd_t *self, messd_ins_t 
     }
 }
 
+static inline void _MS_process_calcTenMillisecondPhase(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
+{
+    float rootTenMillisPhase = 10.0f / self->measuredPeriod; // phase for 10 milliseconds in input clock time
+    float scaledTenMillisPhase = rootTenMillisPhase * self->tempoDivide / self->tempoMultiply;
+    float subdivTenMillisPhase = scaledTenMillisPhase * self->beatsPerMeasure / self->subdivisionsPerMeasure;
+
+    self->beatPhaseTenMillis = scaledTenMillisPhase;
+    self->divPhaseTenMillis = subdivTenMillisPhase;
+}
+
 static inline void _MS_process_calculateTruncationOutput(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
 {
     // Newest and simplest idea: truncation output is simply the subdivision output, but with
@@ -457,13 +467,13 @@ static inline void _MS_process_calculateTruncationOutput(messd_t *self, messd_in
     measurePhase /= (float) self->beatsPerMeasure;
     float patternPhase = fmod(measurePhase * self->subdivisionsPerMeasure, 1.0f);
 
-    outs->truncate = patternPhase < ins->pulseWidth;
+    outs->truncate = patternPhase < (ins->useTenMillisecondWidth ? self->divPhaseTenMillis : ins->pulseWidth);
 }
 
 static inline void _MS_process_calculateOutputs(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
 {
     // ==== Output calculation
-    outs->beat = self->scaledClockPhase < ins->pulseWidth;
+    outs->beat = self->scaledClockPhase < (ins->useTenMillisecondWidth ? self->beatPhaseTenMillis : ins->pulseWidth);
 
     // Set tempo out
     outs->scaledTempo = (outs->measuredTempo * self->tempoMultiply) / self->tempoDivide;
@@ -507,14 +517,17 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
         _MS_process_triggerLatchedChanges(self, ins, outs);
     }
 
+    _MS_process_calcTenMillisecondPhase(self, ins, outs);
+
     // Calculate downbeat and measure phase
     measurePhase = self->scaledClockPhase + self->scaledBeatCounter;
     measurePhase /= self->beatsPerMeasure;
-    outs->downbeat = measurePhase < (ins->pulseWidth / ((float) self->beatsPerMeasure));
+    float beatPulseWidth = (ins->useTenMillisecondWidth ? self->beatPhaseTenMillis : ins->pulseWidth);
+    outs->downbeat = measurePhase < (beatPulseWidth / ((float) self->beatsPerMeasure));
 
     // Calculate subdivisions
     subdivision = fmod(measurePhase * self->subdivisionsPerMeasure, 1.0f);
-    outs->subdivision = subdivision < ins->pulseWidth;
+    outs->subdivision = subdivision < (ins->useTenMillisecondWidth ? self->divPhaseTenMillis : ins->pulseWidth);
 
     _MS_process_calculateTruncationOutput(self, ins, outs);
 
