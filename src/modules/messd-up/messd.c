@@ -202,7 +202,18 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
             self->tempoDivide = self->tempoDivide >> 1;
         }
 
-        self->subdivisionsPerMeasure = self->beatsPerMeasure;
+        if (ins->modulationStyle == 0) {
+            // sync
+            self->subdivisionsPerMeasure = self->beatsPerMeasure;
+        } else if (ins->modulationStyle == 1) {
+            // No-op, this is stay mode
+        } else {
+            // flip
+            int tmp = self->subdivisionsPerMeasure;
+            self->subdivisionsPerMeasure = self->beatsPerMeasure;
+            self->beatsPerMeasure = tmp;
+        }
+
         self->rootBeatsSinceModulation = 0;
         self->rootBeatCounter %= self->tempoDivide;
 

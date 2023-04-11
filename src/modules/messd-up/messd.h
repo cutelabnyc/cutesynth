@@ -113,6 +113,7 @@ typedef struct messd_ins
     float phase;
     float pulseWidth;
     bool useTenMillisecondWidth;
+    int modulationStyle;
 
     float delta;
     unsigned long cheatedMeasuredPeriod;
