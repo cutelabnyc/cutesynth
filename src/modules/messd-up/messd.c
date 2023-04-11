@@ -218,6 +218,10 @@ static void _MS_handleModulationLatch(messd_t *self, messd_ins_t *ins, messd_out
         self->rootBeatsSinceModulation = 0;
         self->rootBeatCounter %= self->tempoDivide;
 
+        // Update counts on metric modulation
+        ins->subdivisionsPerMeasure = self->subdivisionsPerMeasure;
+        ins->beatsPerMeasure = self->beatsPerMeasure;
+
         if (ins->latchModulationToDownbeat && ins->isRoundTrip) {
             _MS_startCountdownMemoized(self, ins);
         } else {
