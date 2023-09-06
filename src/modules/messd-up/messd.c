@@ -486,7 +486,8 @@ static inline void _MS_process_calculateTruncationOutput(messd_t *self, messd_in
 static inline void _MS_process_calculateOutputs(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
 {
     // ==== Output calculation
-    outs->beat = self->scaledClockPhase < (ins->useTenMillisecondWidth ? self->beatPhaseTenMillis : ins->pulseWidth);
+    float multipliedClockPhase = fmod(self->scaledClockPhase * ((float) ins->beatOutputMultiplier), 1.0f);
+    outs->beat = multipliedClockPhase < (ins->useTenMillisecondWidth ? self->beatPhaseTenMillis : ins->pulseWidth);
 
     // Set tempo out
     outs->scaledTempo = (outs->measuredTempo * self->tempoMultiply) / self->tempoDivide;
@@ -539,7 +540,7 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     outs->downbeat = measurePhase < (beatPulseWidth / ((float) self->beatsPerMeasure));
 
     // Calculate subdivisions
-    subdivision = fmod(measurePhase * self->subdivisionsPerMeasure, 1.0f);
+    subdivision = fmod(measurePhase * self->subdivisionsPerMeasure * ((float) ins->divOutputMultiplier), 1.0f);
     outs->subdivision = subdivision < (ins->useTenMillisecondWidth ? self->divPhaseTenMillis : ins->pulseWidth);
 
     _MS_process_calculateTruncationOutput(self, ins, outs);

@@ -96,6 +96,8 @@ typedef struct messd_ins
     float tempo;
     uint8_t beatsPerMeasure;
     uint8_t subdivisionsPerMeasure;
+    uint8_t beatOutputMultiplier;
+    uint8_t divOutputMultiplier;
     float truncation; // normalized to the number of beats
     float ext_clock;
 
