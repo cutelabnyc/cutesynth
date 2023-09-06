@@ -134,6 +134,8 @@ typedef struct messd_outs
     bool truncate;
     bool eom;
     bool modulationRequestSkipped;
+    bool beat_ppqn;
+    bool div_ppqn;
 
     // debug
     int patternIndex;

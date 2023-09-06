@@ -487,7 +487,8 @@ static inline void _MS_process_calculateOutputs(messd_t *self, messd_ins_t *ins,
 {
     // ==== Output calculation
     float multipliedClockPhase = fmod(self->scaledClockPhase * ((float) ins->beatOutputMultiplier), 1.0f);
-    outs->beat = multipliedClockPhase < (ins->useTenMillisecondWidth ? self->beatPhaseTenMillis : ins->pulseWidth);
+    outs->beat = self->scaledClockPhase < (ins->useTenMillisecondWidth ? self->beatPhaseTenMillis : ins->pulseWidth);
+    outs->beat_ppqn = multipliedClockPhase < (ins->useTenMillisecondWidth ? self->beatPhaseTenMillis : ins->pulseWidth);
 
     // Set tempo out
     outs->scaledTempo = (outs->measuredTempo * self->tempoMultiply) / self->tempoDivide;
@@ -507,6 +508,7 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     float measurePhaseFloor = 0;
     float measurePhaseCeiling = 0;
     float subdivision = 0;
+    float subdivision_mult = 0;
     float phasor = 0;
     outs->eom = false;
     outs->modulationRequestSkipped = false;
@@ -540,8 +542,10 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     outs->downbeat = measurePhase < (beatPulseWidth / ((float) self->beatsPerMeasure));
 
     // Calculate subdivisions
-    subdivision = fmod(measurePhase * self->subdivisionsPerMeasure * ((float) ins->divOutputMultiplier), 1.0f);
+    subdivision = fmod(measurePhase * ((float) ins->divOutputMultiplier), 1.0f);
     outs->subdivision = subdivision < (ins->useTenMillisecondWidth ? self->divPhaseTenMillis : ins->pulseWidth);
+    subdivision_mult = fmod(measurePhase * self->subdivisionsPerMeasure * ((float) ins->divOutputMultiplier), 1.0f);
+    outs->div_ppqn = subdivision_mult < (ins->useTenMillisecondWidth ? self->divPhaseTenMillis : ins->pulseWidth);
 
     _MS_process_calculateTruncationOutput(self, ins, outs);
 
