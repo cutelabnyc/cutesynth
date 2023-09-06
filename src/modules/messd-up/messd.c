@@ -542,7 +542,7 @@ void MS_process(messd_t *self, messd_ins_t *ins, messd_outs_t *outs)
     outs->downbeat = measurePhase < (beatPulseWidth / ((float) self->beatsPerMeasure));
 
     // Calculate subdivisions
-    subdivision = fmod(measurePhase * ((float) ins->divOutputMultiplier), 1.0f);
+    subdivision = fmod(measurePhase * self->subdivisionsPerMeasure, 1.0f);
     outs->subdivision = subdivision < (ins->useTenMillisecondWidth ? self->divPhaseTenMillis : ins->pulseWidth);
     subdivision_mult = fmod(measurePhase * self->subdivisionsPerMeasure * ((float) ins->divOutputMultiplier), 1.0f);
     outs->div_ppqn = subdivision_mult < (ins->useTenMillisecondWidth ? self->divPhaseTenMillis : ins->pulseWidth);
