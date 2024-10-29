@@ -1,3 +1,6 @@
 [submodule "thirdparty/unity"]
 	path = thirdparty/unity
 	url = https://github.com/ThrowTheSwitch/Unity.git
+[submodule "thirdparty/portaudio"]
+	path = thirdparty/portaudio
+	url = https://github.com/portaudio/portaudio.git
