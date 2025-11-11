@@ -89,6 +89,10 @@ typedef struct messd
     bool modulationForced;
     bool resetPending;
     bool modulateOnEdgeEnabled;
+    bool truncationHysteresisActive;
+    float savedTruncationValue;
+    float truncationHysteresisStartTime;
+    float truncationHysteresisTime;
 } messd_t;
 
 typedef struct messd_ins

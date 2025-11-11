@@ -53,6 +53,10 @@ void MS_init(messd_t *self)
     self->modulationForced = false;
     self->resetPending = false;
     self->modulateOnEdgeEnabled = true;
+    self->truncationHysteresisActive = false;
+    self->savedTruncationValue = 0.0f;
+    self->truncationHysteresisStartTime = 0.0f;
+    self->truncationHysteresisTime = 0.05f;
 
 #ifdef TRACK_INPUT_CLOCK_PERIOD
     self->msSinceLastLeadingEdge = 500.0f; //120 bpm
@@ -466,7 +470,15 @@ static inline void _MS_process_calculateTruncationOutput(messd_t *self, messd_in
     // a hard reset point somewhere in the measure.
 
     // For now, don't bother to latch this
-    self->patternFactor = ins->truncation;
+    if (self->truncationHysteresisActive) {
+        self->patternFactor = self->savedTruncationValue;
+        self->truncationHysteresisStartTime += ins->delta / 1000.0f;
+        if (self->truncationHysteresisStartTime >= self->truncationHysteresisTime) {
+            self->truncationHysteresisActive = false;
+        }
+    } else {
+        self->patternFactor = ins->truncation;
+    }
 
     // If truncation is less than 0, simply return subdivision
     if (self->patternFactor < 0 || self->patternFactor == 0.0f || self->patternFactor == 1.0f) {
@@ -476,7 +488,14 @@ static inline void _MS_process_calculateTruncationOutput(messd_t *self, messd_in
 
     float truncfac = fmod(self->patternFactor, 1.0f) * self->beatsPerMeasure;
     float measurePhase = self->scaledClockPhase + self->scaledBeatCounter;
-    if (measurePhase > truncfac) measurePhase -= truncfac;
+    if (measurePhase > truncfac) {
+        measurePhase -= truncfac;
+        if (self->truncationHysteresisActive == false) {
+            self->savedTruncationValue = ins->truncation;
+            self->truncationHysteresisStartTime = 0.0f;
+            self->truncationHysteresisActive = true;
+        }
+    }
     measurePhase /= (float) self->beatsPerMeasure;
     float patternPhase = fmod(measurePhase * self->subdivisionsPerMeasure, 1.0f);
 
